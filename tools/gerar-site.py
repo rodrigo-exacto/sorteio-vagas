@@ -73,6 +73,54 @@ hr{border:0;border-top:1px solid var(--rule);margin:34px 0}
 footer.rodape{border-top:1px solid var(--rule);margin-top:54px;background:var(--panel)}
 footer.rodape .wrap{padding-block:22px;font-size:13.5px;color:var(--muted)}
 @media (max-width:560px){ .botoes .b{width:100%;text-align:center} }
+
+/* ---- cartões, grades e figuras da página inicial ---- */
+.heroi{padding:52px 0 10px}
+.heroi h1{margin:0 0 16px}
+.grade{display:grid;gap:16px;margin:22px 0}
+@media (min-width:720px){ .grade-3{grid-template-columns:repeat(3,1fr)} .grade-2{grid-template-columns:repeat(2,1fr)} }
+.passo{background:var(--panel);border:1px solid var(--rule);border-radius:7px;padding:20px 20px 22px;
+  display:flex;flex-direction:column;gap:10px}
+.passo .n{width:30px;height:30px;border-radius:50%;border:1px solid var(--marca);color:var(--marca-ink);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex:none}
+.passo h3{margin:0;font-size:16.5px;letter-spacing:-.005em}
+.passo p{margin:0;font-size:14.5px}
+.precisa{background:var(--panel);border:1px solid var(--rule);border-radius:7px;padding:18px 20px}
+.precisa h3{margin:0 0 6px;font-size:15.5px}
+.precisa p{margin:0;font-size:14px;color:var(--muted)}
+.precisa .tag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--marca-ink);border:1px solid var(--rule);border-radius:3px;
+  padding:2px 7px;margin-bottom:9px}
+.figura{background:var(--panel);border:1px solid var(--rule);border-radius:7px;padding:18px 16px 10px;margin:26px 0}
+.figura .rolagem{overflow-x:auto}
+.figura svg{display:block;width:100%;min-width:620px;height:auto}
+.figura figcaption{font-size:13.5px;color:var(--muted);padding:6px 6px 8px;margin:0}
+.linha-tempo .trilho{stroke:var(--rule);stroke-width:2}
+.linha-tempo .vao{fill:var(--marca);opacity:.07}
+.linha-tempo .marco{fill:var(--panel);stroke:var(--marca);stroke-width:2}
+.linha-tempo .rot{fill:var(--ink);font:600 14px var(--sans)}
+.linha-tempo .sub{fill:var(--muted);font:12px var(--mono)}
+.linha-tempo .chip{fill:var(--ground);stroke:var(--rule)}
+.linha-tempo .glifo{fill:var(--marca-ink)}
+.linha-tempo .pulso{fill:var(--marca);animation:correr 7s cubic-bezier(.65,0,.35,1) infinite}
+.linha-tempo .pulsa{animation:pulsar 7s ease-in-out infinite}
+@keyframes correr{
+  0%,8%    {transform:translateX(0);opacity:0}
+  14%      {transform:translateX(0);opacity:1}
+  52%      {transform:translateX(380px);opacity:1}
+  62%      {transform:translateX(380px);opacity:1}
+  86%,100% {transform:translateX(590px);opacity:0}
+}
+@keyframes pulsar{0%,30%{opacity:.07} 48%{opacity:.17} 66%,100%{opacity:.07}}
+@media (prefers-reduced-motion:reduce){
+  .linha-tempo .pulso,.linha-tempo .pulsa{animation:none}
+  .linha-tempo .pulso{opacity:0}
+}
+.aviso{background:var(--panel);border:1px solid var(--rule);border-left:3px solid var(--marca);
+  border-radius:0 7px 7px 0;padding:16px 18px;margin:22px 0}
+.aviso h3{margin:0 0 6px;font-size:15.5px}
+.aviso p{margin:0;font-size:14.5px}
+
 """
 
 
@@ -105,8 +153,9 @@ def pagina(titulo, descricao, corpo, ativo=""):
 </main>
 <footer class="rodape"><div class="wrap">
   Garagem Justa é operado por Exacto Gestão de Condomínios. O verificador e o
-  motor de sorteio funcionam sem servidor: tudo roda no navegador de quem
-  confere, e nenhum dado é enviado a lugar nenhum.
+  motor de sorteio funcionam sem servidor: rodam no navegador de quem confere, e
+  o que você colar aqui para conferir não é enviado a lugar nenhum. O cadastro de
+  cada condomínio fica em sistema da administradora, de acesso restrito.
 </div></footer>
 </body>
 </html>
@@ -193,7 +242,58 @@ def main():
     )
 
     # ---- index.html ----
+    diagrama = """
+<figure class="figura">
+<div class="rolagem">
+<svg class="linha-tempo" viewBox="0 0 880 210" role="img"
+     aria-label="Linha do tempo: a lista é congelada e o compromisso vai para a ata; só depois chega o número da fonte externa; o resultado é a conta dos dois.">
+
+  <text class="rot" x="180" y="40" text-anchor="middle">Lista congelada</text>
+  <rect class="chip" x="88" y="54" width="184" height="26" rx="4"/>
+  <text class="sub" x="180" y="71" text-anchor="middle">compromisso 9f3a2b7c...</text>
+
+  <g>
+    <text class="rot" x="560" y="40" text-anchor="middle">Número de fora</text>
+    <rect class="chip" x="452" y="54" width="216" height="26" rx="4"/>
+    <text class="sub" x="560" y="71" text-anchor="middle">Loteria Federal ou drand</text>
+    <circle class="marco" cx="560" cy="134" r="16"/>
+    <circle class="glifo" cx="554" cy="129" r="2.2"/>
+    <circle class="glifo" cx="566" cy="129" r="2.2"/>
+    <circle class="glifo" cx="554" cy="140" r="2.2"/>
+    <circle class="glifo" cx="566" cy="140" r="2.2"/>
+  </g>
+
+  <text class="rot" x="770" y="40" text-anchor="middle">Resultado</text>
+  <rect class="chip" x="690" y="54" width="160" height="26" rx="4"/>
+  <text class="sub" x="770" y="71" text-anchor="middle">um só possível</text>
+
+  <rect class="vao pulsa" x="180" y="126" width="380" height="16" rx="8"/>
+  <line class="trilho" x1="40" y1="134" x2="826" y2="134"/>
+  <path class="trilho" d="M826 128 L840 134 L826 140" fill="none"/>
+  <circle class="pulso" cx="180" cy="134" r="4"/>
+
+  <circle class="marco" cx="180" cy="134" r="16"/>
+  <rect class="glifo" x="173" y="133" width="14" height="10" rx="2"/>
+  <path d="M176 133 v-4 a4 4 0 0 1 8 0 v4" fill="none" stroke="var(--marca-ink)" stroke-width="2"/>
+
+  <circle class="marco" cx="770" cy="134" r="16"/>
+  <rect class="glifo" x="762" y="130" width="16" height="2.4" rx="1.2"/>
+  <rect class="glifo" x="762" y="136" width="16" height="2.4" rx="1.2"/>
+
+  <text class="sub" x="180" y="164" text-anchor="middle">assembleia abre</text>
+  <text class="sub" x="560" y="164" text-anchor="middle">minutos depois</text>
+  <text class="sub" x="770" y="164" text-anchor="middle">na hora</text>
+  <text class="sub" x="370" y="194" text-anchor="middle">neste intervalo o número ainda não existe, para ninguém</text>
+</svg>
+</div>
+<figcaption>A ordem é o que prova. O compromisso da lista é lavrado em ata antes de
+existir o número que vai embaralhá-la, então não há como escolher a lista sabendo o
+sorteio, nem o sorteio sabendo a lista.</figcaption>
+</figure>
+"""
+
     inicio = f"""
+<div class="heroi">
 <h1>O sorteio da sua vaga pode ser conferido por você</h1>
 
 <p class="chamada">Garagem Justa é o processo que a administração usa para sortear
@@ -206,26 +306,37 @@ chega.</p>
   <a class="b" href="/verificador.html">Conferir um sorteio</a>
   <a class="b sec" href="/protocolo.html">Como funciona por dentro</a>
 </div>
+</div>
+
+{diagrama}
 
 <h2>Como funciona</h2>
 
-<ol class="passos">
-  <li><b>A lista é fechada na frente de todos.</b> Encerrada a discussão sobre
-  quem participa e quais vagas são sorteáveis, a relação é congelada na
-  assembleia e dela se extrai um resumo criptográfico, o compromisso. Ele é lido
-  em voz alta e lançado em ata. Qualquer alteração posterior, mesmo de um único
-  caractere, faz esse resumo deixar de bater.</li>
-
-  <li><b>A aleatoriedade vem de fora e chega depois.</b> Só então se colhe o
-  número que vai embaralhar a lista: os prêmios da Loteria Federal daquela noite,
-  ou uma rodada do sorteio distribuído drand, publicada minutos depois do
-  congelamento. Nos dois casos ninguém, nem a administração, pode conhecer esse
-  número no momento em que a lista foi fechada.</li>
-
-  <li><b>O resultado é uma conta, não uma decisão.</b> Compromisso mais
-  aleatoriedade produzem um único resultado possível. Quem repetir a conta com os
-  mesmos dados chega necessariamente ao mesmo lugar.</li>
-</ol>
+<div class="grade grade-3">
+  <div class="passo">
+    <div class="n">1</div>
+    <h3>A lista é fechada na frente de todos</h3>
+    <p>Encerrada a discussão sobre quem participa e quais vagas são sorteáveis, a
+    relação é congelada na assembleia e dela se extrai um resumo criptográfico, o
+    compromisso. Ele é lido em voz alta e lançado em ata. Qualquer alteração
+    posterior, mesmo de um único caractere, faz esse resumo deixar de bater.</p>
+  </div>
+  <div class="passo">
+    <div class="n">2</div>
+    <h3>A aleatoriedade vem de fora e chega depois</h3>
+    <p>Só então se colhe o número que vai embaralhar a lista: os prêmios da Loteria
+    Federal daquela noite, ou uma rodada do sorteio distribuído drand, publicada
+    minutos depois do congelamento. Nos dois casos ninguém, nem a administração,
+    pode conhecer esse número no momento em que a lista foi fechada.</p>
+  </div>
+  <div class="passo">
+    <div class="n">3</div>
+    <h3>O resultado é uma conta, não uma decisão</h3>
+    <p>Compromisso mais aleatoriedade produzem um único resultado possível. Quem
+    repetir a conta com os mesmos dados chega necessariamente ao mesmo lugar, hoje
+    ou daqui a dez anos.</p>
+  </div>
+</div>
 
 <h2>O que você precisa para conferir</h2>
 
@@ -233,13 +344,28 @@ chega.</p>
 qualquer condômino que pedir, no dever de informação que acompanha a
 administração de coisa alheia:</p>
 
-<table>
-  <tr><th>O quê</th><th>Para quê serve</th></tr>
-  <tr><td>O texto integral da lista congelada</td><td>É o insumo do cálculo</td></tr>
-  <tr><td>O compromisso lançado em ata</td><td>Prova que a lista não mudou depois</td></tr>
-  <tr><td>O resultado da fonte de aleatoriedade</td><td>Você confere na origem: portal da Caixa ou api.drand.sh</td></tr>
-  <tr><td>O hash do resultado</td><td>Prova que o resultado anunciado é o que a conta produz</td></tr>
-</table>
+<div class="grade grade-2">
+  <div class="precisa">
+    <span class="tag">insumo</span>
+    <h3>O texto integral da lista congelada</h3>
+    <p>É o que entra no cálculo, exatamente como foi fechado.</p>
+  </div>
+  <div class="precisa">
+    <span class="tag">prova de anterioridade</span>
+    <h3>O compromisso lançado em ata</h3>
+    <p>Prova que a lista não mudou depois que o sorteio aconteceu.</p>
+  </div>
+  <div class="precisa">
+    <span class="tag">fonte externa</span>
+    <h3>O resultado da fonte de aleatoriedade</h3>
+    <p>Você confere na origem: no portal da Caixa ou em api.drand.sh, não conosco.</p>
+  </div>
+  <div class="precisa">
+    <span class="tag">fecho</span>
+    <h3>O hash do resultado</h3>
+    <p>Prova que o resultado anunciado é o mesmo que a conta produz.</p>
+  </div>
+</div>
 
 <p>Com isso em mãos, abra o <a href="/verificador.html">verificador</a>, cole e
 compare. A página funciona offline: salve o arquivo e ele continua valendo daqui
@@ -266,12 +392,20 @@ implementações são conferidas uma contra a outra por vetores de teste. Baixe
 <code>python3 sorteio.py payload.txt "&lt;valor da fonte&gt;"</code>. Duas
 implementações independentes que concordam valem muito mais que uma.</p>
 
+<div class="aviso">
+  <h3>O que este site sabe sobre você</h3>
+  <p>Nada. O verificador e o motor rodam inteiramente no seu navegador: os dados
+  que você cola para conferir não são enviados a servidor nenhum, nem ao nosso. O
+  cadastro de unidades e vagas de cada condomínio, esse sim, fica em sistema da
+  administradora, com acesso restrito à equipe que conduz a assembleia.</p>
+</div>
+
 <h2>Para quem conduz a assembleia</h2>
 
-<p>A aplicação de condução é de uso da administração e roda inteira no navegador,
-sem servidor e sem enviar dados: <a href="/app/">abrir a aplicação</a>. Ela não
-guarda nada além do que estiver no computador de quem opera.</p>
+<p>A aplicação de condução é de uso da administração: <a href="/app/">abrir a
+aplicação</a>.</p>
 """
+
     (SITE / "index.html").write_text(
         pagina(
             "Garagem Justa — sorteio de vagas verificável",

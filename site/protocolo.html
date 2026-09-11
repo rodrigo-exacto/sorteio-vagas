@@ -61,6 +61,54 @@ hr{border:0;border-top:1px solid var(--rule);margin:34px 0}
 footer.rodape{border-top:1px solid var(--rule);margin-top:54px;background:var(--panel)}
 footer.rodape .wrap{padding-block:22px;font-size:13.5px;color:var(--muted)}
 @media (max-width:560px){ .botoes .b{width:100%;text-align:center} }
+
+/* ---- cartões, grades e figuras da página inicial ---- */
+.heroi{padding:52px 0 10px}
+.heroi h1{margin:0 0 16px}
+.grade{display:grid;gap:16px;margin:22px 0}
+@media (min-width:720px){ .grade-3{grid-template-columns:repeat(3,1fr)} .grade-2{grid-template-columns:repeat(2,1fr)} }
+.passo{background:var(--panel);border:1px solid var(--rule);border-radius:7px;padding:20px 20px 22px;
+  display:flex;flex-direction:column;gap:10px}
+.passo .n{width:30px;height:30px;border-radius:50%;border:1px solid var(--marca);color:var(--marca-ink);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex:none}
+.passo h3{margin:0;font-size:16.5px;letter-spacing:-.005em}
+.passo p{margin:0;font-size:14.5px}
+.precisa{background:var(--panel);border:1px solid var(--rule);border-radius:7px;padding:18px 20px}
+.precisa h3{margin:0 0 6px;font-size:15.5px}
+.precisa p{margin:0;font-size:14px;color:var(--muted)}
+.precisa .tag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--marca-ink);border:1px solid var(--rule);border-radius:3px;
+  padding:2px 7px;margin-bottom:9px}
+.figura{background:var(--panel);border:1px solid var(--rule);border-radius:7px;padding:18px 16px 10px;margin:26px 0}
+.figura .rolagem{overflow-x:auto}
+.figura svg{display:block;width:100%;min-width:620px;height:auto}
+.figura figcaption{font-size:13.5px;color:var(--muted);padding:6px 6px 8px;margin:0}
+.linha-tempo .trilho{stroke:var(--rule);stroke-width:2}
+.linha-tempo .vao{fill:var(--marca);opacity:.07}
+.linha-tempo .marco{fill:var(--panel);stroke:var(--marca);stroke-width:2}
+.linha-tempo .rot{fill:var(--ink);font:600 14px var(--sans)}
+.linha-tempo .sub{fill:var(--muted);font:12px var(--mono)}
+.linha-tempo .chip{fill:var(--ground);stroke:var(--rule)}
+.linha-tempo .glifo{fill:var(--marca-ink)}
+.linha-tempo .pulso{fill:var(--marca);animation:correr 7s cubic-bezier(.65,0,.35,1) infinite}
+.linha-tempo .pulsa{animation:pulsar 7s ease-in-out infinite}
+@keyframes correr{
+  0%,8%    {transform:translateX(0);opacity:0}
+  14%      {transform:translateX(0);opacity:1}
+  52%      {transform:translateX(380px);opacity:1}
+  62%      {transform:translateX(380px);opacity:1}
+  86%,100% {transform:translateX(590px);opacity:0}
+}
+@keyframes pulsar{0%,30%{opacity:.07} 48%{opacity:.17} 66%,100%{opacity:.07}}
+@media (prefers-reduced-motion:reduce){
+  .linha-tempo .pulso,.linha-tempo .pulsa{animation:none}
+  .linha-tempo .pulso{opacity:0}
+}
+.aviso{background:var(--panel);border:1px solid var(--rule);border-left:3px solid var(--marca);
+  border-radius:0 7px 7px 0;padding:16px 18px;margin:22px 0}
+.aviso h3{margin:0 0 6px;font-size:15.5px}
+.aviso p{margin:0;font-size:14.5px}
+
 </style>
 </head>
 <body>
@@ -498,8 +546,9 @@ resolvido no cadastro e na conferência antes do congelamento.</p>
 </main>
 <footer class="rodape"><div class="wrap">
   Garagem Justa é operado por Exacto Gestão de Condomínios. O verificador e o
-  motor de sorteio funcionam sem servidor: tudo roda no navegador de quem
-  confere, e nenhum dado é enviado a lugar nenhum.
+  motor de sorteio funcionam sem servidor: rodam no navegador de quem confere, e
+  o que você colar aqui para conferir não é enviado a lugar nenhum. O cadastro de
+  cada condomínio fica em sistema da administradora, de acesso restrito.
 </div></footer>
 </body>
 </html>
