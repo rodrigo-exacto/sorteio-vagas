@@ -114,7 +114,19 @@ def pagina(titulo, descricao, corpo, ativo=""):
 
 
 def main():
+    # O acervo de versoes antigas do verificador sobrevive a regeracao. Sem isso
+    # o rmtree abaixo apagaria os arquivos que atas ja assinadas citam pelo hash.
+    acervo = {}
+    sha_anterior = None
     if SITE.exists():
+        atual = SITE / "verificador.html"
+        if atual.exists():
+            bytes_anterior = atual.read_bytes()
+            sha_anterior = hashlib.sha256(bytes_anterior).hexdigest()
+        for p in (SITE / "v").rglob("*"):
+            rel = p.relative_to(SITE / "v").as_posix() if p.is_file() else ""
+            if rel and rel != "index.html":   # o indice e regerado, nao preservado
+                acervo[rel] = p.read_bytes()
         shutil.rmtree(SITE)
     (SITE / "app").mkdir(parents=True)
     (SITE / "core").mkdir(parents=True)
@@ -128,6 +140,34 @@ def main():
         shutil.copy(RAIZ / "core" / nome, SITE / "core" / nome)
 
     sha = hashlib.sha256((SITE / "verificador.html").read_bytes()).hexdigest()
+
+    # A versao que sai de cartaz vai para /v/<sha>/, endereco que a ata ja cita
+    # pelo proprio hash. Quem conferir em 2035 um sorteio de 2026 acha o arquivo
+    # de 2026, com o hash que a ata dele registra.
+    if sha_anterior and sha_anterior != sha:
+        acervo[f"{sha_anterior}/verificador.html"] = bytes_anterior
+    for rel, dados in acervo.items():
+        destino = SITE / "v" / rel
+        destino.parent.mkdir(parents=True, exist_ok=True)
+        destino.write_bytes(dados)
+    if acervo:
+        linhas = "\n".join(
+            f'  <tr><td><a href="/v/{r}">{r.split("/")[0]}</a></td></tr>'
+            for r in sorted(acervo)
+        )
+        (SITE / "v" / "index.html").write_text(
+            pagina(
+                "Versoes anteriores do verificador",
+                "Acervo das versoes do verificador citadas em atas ja lavradas.",
+                "<h1>Versoes anteriores do verificador</h1>"
+                "<p>Cada ata registra o SHA-256 do verificador vigente na data da "
+                "assembleia. Quando o verificador muda, a versao anterior fica aqui, "
+                "em endereco formado pelo proprio hash, e continua valendo para as "
+                "atas que a citam.</p>"
+                f"<table><tr><th>SHA-256</th></tr>\n{linhas}\n</table>",
+            ),
+            encoding="utf-8",
+        )
 
     # a aplicação não precisa aparecer em buscador
     (SITE / "robots.txt").write_text(
@@ -212,7 +252,10 @@ a anos, mesmo que este site saia do ar.</p>
   confiar no que ele diz. No Windows:
   <code>certutil -hashfile verificador.html SHA256</code>. No Linux ou no Mac:
   <code>sha256sum verificador.html</code>.</p>
-  <p class="hash" style="margin:0">SHA-256 da versão publicada agora:<br>{sha}</p>
+  <p class="hash" style="margin:0 0 10px">SHA-256 da versão publicada agora:<br>{sha}</p>
+  <p style="margin:0;font-size:14px">Se a sua ata cita outro hash, ela é de uma
+  versão anterior do verificador, que continua publicada em
+  <code>/v/&lt;hash da ata&gt;/verificador.html</code>.</p>
 </div>
 
 <h2>Não quer confiar em JavaScript</h2>

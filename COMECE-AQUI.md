@@ -87,11 +87,12 @@ entrada, o verificador público, o protocolo e a própria aplicação.
 
 Anote o SHA-256 do verificador que o comando imprime: é ele que vai na ata.
 
-Atualizar depois é subir por cima, pelo mesmo caminho, e a URL não muda. Só uma
-regra: corrija sempre aqui na pasta, nunca direto no painel da Hostinger, ou a
-correção some no envio seguinte. E `verificador.html` nunca se corrige no
-servidor, porque o hash dele está lavrado em ata. O procedimento de troca de
-versão está no PUBLICAR.md.
+Atualizar depois é commit e push no GitHub Desktop: a Vercel republica sozinha
+em um ou dois minutos e a URL não muda. Só uma regra: corrija sempre na fonte,
+que é `app/`, `core/` e `docs/`, nunca dentro de `site/`, que é pasta gerada e
+some no próximo `tools/gerar-site.py`. O `verificador.html` é caso à parte,
+porque o hash dele está lavrado em ata; o procedimento de troca de versão está
+no PUBLICAR.md e já é automático.
 
 ---
 
