@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Protocolo Garagem Justa</title>
+<meta name="description" content="Especificação normativa do sorteio de vagas publicamente verificável.">
+<style>
+:root{
+  --ground:#edeee9; --panel:#fff; --ink:#16191c; --ink2:#3b4046; --muted:#636b71;
+  --rule:#d7d9d2; --marca:#a8802f; --marca-ink:#7a5c1e; --ok:#2f6b4f;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-tema="claro"]){
+    --ground:#14161a; --panel:#1b1e23; --ink:#f0ede4; --ink2:#cfcbc0; --muted:#9aa0a6;
+    --rule:#2c3036; --marca:#d8b45e; --marca-ink:#e6c87f; --ok:#7fbf9b;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:16px/1.65 var(--sans);
+  -webkit-font-smoothing:antialiased}
+.faixa{height:6px;background:repeating-linear-gradient(115deg,var(--marca) 0 10px,transparent 10px 22px)}
+.wrap{max-width:860px;margin:0 auto;padding:0 20px}
+header.topo{background:var(--panel);border-bottom:1px solid var(--rule)}
+header.topo .wrap{padding-block:16px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.marca{font-weight:700;font-size:19px;letter-spacing:-.01em}
+.marca span{color:var(--muted);font-weight:400;font-size:12px;margin-left:9px;letter-spacing:.04em;
+  font-family:var(--mono)}
+nav.topo-links{margin-left:auto;display:flex;gap:16px;font-size:14px}
+nav.topo-links a{color:var(--ink2);text-decoration:none;border-bottom:1px solid transparent}
+nav.topo-links a:hover{color:var(--marca-ink);border-bottom-color:var(--marca)}
+h1{font-size:clamp(28px,4.2vw,40px);line-height:1.15;letter-spacing:-.02em;margin:40px 0 14px}
+h2{font-size:22px;letter-spacing:-.01em;margin:38px 0 10px}
+h3{font-size:17px;margin:26px 0 8px}
+p{margin:0 0 14px;color:var(--ink2)}
+a{color:var(--marca-ink)}
+.chamada{font-size:19px;line-height:1.55;color:var(--ink)}
+.botoes{display:flex;gap:12px;flex-wrap:wrap;margin:26px 0 8px}
+.b{display:inline-block;background:var(--ink);color:var(--ground);border-radius:5px;
+  padding:12px 22px;font-weight:600;font-size:15px;text-decoration:none}
+.b.sec{background:var(--panel);color:var(--ink);border:1px solid var(--rule)}
+.cartao{background:var(--panel);border:1px solid var(--rule);border-radius:7px;padding:20px 22px;margin:18px 0}
+.passos{counter-reset:p;list-style:none;padding:0;margin:18px 0}
+.passos li{counter-increment:p;position:relative;padding:0 0 0 44px;margin:0 0 18px;color:var(--ink2)}
+.passos li::before{content:counter(p);position:absolute;left:0;top:1px;width:28px;height:28px;
+  border-radius:50%;border:1px solid var(--marca);color:var(--marca-ink);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+.passos b{color:var(--ink)}
+code,.mono{font-family:var(--mono);font-size:.9em}
+.hash{font-family:var(--mono);font-size:12.5px;word-break:break-all;color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;margin:14px 0}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font:600 12px var(--sans);letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+blockquote{margin:16px 0;padding:2px 0 2px 16px;border-left:3px solid var(--marca);color:var(--ink2)}
+pre{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:14px 16px;
+  overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55}
+pre code{font-size:inherit}
+hr{border:0;border-top:1px solid var(--rule);margin:34px 0}
+footer.rodape{border-top:1px solid var(--rule);margin-top:54px;background:var(--panel)}
+footer.rodape .wrap{padding-block:22px;font-size:13.5px;color:var(--muted)}
+@media (max-width:560px){ .botoes .b{width:100%;text-align:center} }
+</style>
+</head>
+<body>
+<div class="faixa"></div>
+<header class="topo"><div class="wrap">
+  <div class="marca"><a href="/" style="color:inherit;text-decoration:none">Garagem Justa</a><span>protocolo garagem-justa/v1</span></div>
+  <nav class="topo-links">
+    <a href="/">Início</a>
+    <a href="/verificador.html">Conferir um sorteio</a>
+    <a href="/protocolo.html" style="color:var(--marca-ink)">Protocolo</a>
+  </nav>
+</div></header>
+<main class="wrap">
+<h1 style="margin-top:34px">Protocolo Garagem Justa v1</h1>
+<p>Especificação do sorteio de vagas publicamente verificável.</p>
+<p>Este documento é normativo. Quem quiser reimplementar o sorteio em outra
+linguagem e conferir o resultado de uma assembleia precisa apenas dele e dos
+vetores de teste em <code>core/vetores.json</code>.</p>
+<p>Versão do protocolo: <code>garagem-justa/v1</code>
+Data: 11/09/2026</p>
+<hr />
+<h2>1. O que o protocolo garante, e o que não garante</h2>
+<p><strong>Garante</strong> que, dados o payload do compromisso e o valor do beacon, o resultado
+é único, reproduzível por qualquer pessoa, e não pôde ser escolhido nem pelo
+organizador nem por nenhum participante.</p>
+<p><strong>Não garante</strong> que o payload descreve a realidade. Se a lista de unidades
+estiver errada, ou se uma vaga que deveria ser sorteada ficou de fora, o
+protocolo vai calcular certinho a coisa errada. Essa camada é jurídica e
+documental, não criptográfica: é o edital, a ata e a triagem dominial das vagas
+que respondem por ela.</p>
+<hr />
+<h2>2. Ordenação temporal</h2>
+<p>A prova inteira depende de uma única ordem: <strong>o compromisso antes do beacon</strong>.
+Se o beacon já existia quando o compromisso foi gerado, não há prova nenhuma.</p>
+<p>Note o que essa exigência <strong>não</strong> diz. Ela não exige que o compromisso seja
+gerado dias antes, nem que saia no edital. Exige apenas que ele anteceda a
+aleatoriedade. Isso permite congelar o cadastro na própria assembleia, que é o
+que o protocolo adota:</p>
+<pre><code>t-n  Convocação. Anuncia o método, a fonte de aleatoriedade e a relação
+     de vagas fora do sorteio. NÃO traz o compromisso, que ainda não
+     existe: o cadastro segue aberto justamente para que a assembleia
+     possa corrigi-lo.
+
+t0   Abertura do sorteio, já em assembleia, encerrada a deliberação
+     sobre quem participa e o que é sorteável. Congela-se o payload,
+     calcula-se C, lê-se C em voz alta e lança-se em ata.
+     Nesse instante o beacon AINDA NÃO EXISTE.
+
+t1   O beacon é produzido publicamente, minutos depois.
+
+t2   Apura-se. Ata registra C, o beacon, a semente e o hash do resultado.
+</code></pre>
+<p>A distância entre t0 e t1 é de minutos, não de dias. Isso é suficiente: o que
+torna o resultado inescolhível não é a antecedência, é a impossibilidade de
+conhecer o beacon em t0.</p>
+<p><strong>Consequência prática.</strong> Tudo permanece editável até t0: exceções de PNE que
+dependem de documento entregue na hora, unidade que apareceu, vaga que a
+assembleia decidiu retirar do pool. O que se perde ao congelar tarde é a
+possibilidade de o edital já trazer C; o que se ganha é que o compromisso
+descreve o cadastro que a assembleia efetivamente aprovou, e não uma versão
+anterior que precisaria ser retificada depois.</p>
+<p><strong>O que substitui o edital como prova de que C veio antes.</strong> A ata, lavrada na
+ordem dos fatos, com C lido em voz alta antes de colhida a aleatoriedade; a
+cadeia de eventos da aplicação, que registra o congelamento com carimbo próprio;
+e, na fonte drand, a própria aritmética: a rodada citada só nasce depois, e o
+verificador recusa payload cuja rodada seja anterior a <code>congelado_em</code>.</p>
+<hr />
+<h2>3. Payload do compromisso</h2>
+<p>Arquivo de texto UTF-8. É o insumo congelado do sorteio.</p>
+<h3>3.1 Forma canônica</h3>
+<p>Um payload só é válido se for canônico. Canônico significa:</p>
+<ul>
+<li>Normalização Unicode <strong>NFC</strong>. "José" tem duas representações possíveis e elas
+  produzem hashes diferentes.</li>
+<li>Quebra de linha <strong>LF</strong>. CRLF é convertido antes do hash.</li>
+<li>Sem BOM.</li>
+<li>Sem linha em branco.</li>
+<li>Sem espaço no início ou no fim de qualquer linha.</li>
+<li>Quebras de linha no fim do arquivo são descartadas antes do hash, para que um
+  editor de texto não altere o commit ao salvar.</li>
+<li>Campos do cabeçalho na ordem fixa da seção 3.2.</li>
+<li>Listas ordenadas lexicograficamente <strong>pelos bytes UTF-8</strong> do código. Nunca por
+  locale: <code>localeCompare</code> e <code>sorted(key=locale)</code> variam entre máquinas.</li>
+</ul>
+<p>A implementação confere isso reserializando o payload e comparando com o
+original. Se não for idêntico byte a byte, recusa.</p>
+<h3>3.2 Estrutura</h3>
+<pre><code>GARAGEM-JUSTA/COMMIT/v1
+condominio=&lt;texto&gt;
+cnpj=&lt;texto&gt;
+assembleia=&lt;ISO 8601 com fuso, ex 2026-10-14T19:30:00-03:00&gt;
+congelado_em=&lt;ISO 8601 com fuso, instante do congelamento, com segundos&gt;
+modalidade=ATRIBUICAO_DIRETA
+politica_casamento=MENOR_ADEQUADO | PRIMEIRO_ELEGIVEL
+agrupamento=NENHUM | &lt;nome da família de etiquetas que divide o sorteio&gt;
+beacon=LOTERIA_FEDERAL|concurso &lt;n&gt;|&lt;data&gt;
+       ou DRAND_QUICKNET|&lt;cadeia em 64 hex&gt;|&lt;rodada&gt;
+beacon_fallback=&lt;mesma gramática, fonte de contingência&gt;
+sem_vaga=&lt;regra declarada para quem não receber lote&gt;
+salt=&lt;32 hexadecimais, 128 bits, gerados por CSPRNG&gt;
+regras=&lt;texto em uma linha&gt;
+[DEMANDANTES]
+&lt;codigo&gt;;&lt;rotulo&gt;;tickets=&lt;n&gt;;porte=&lt;P|M|G&gt;;grupo=&lt;nome&gt;
+[LOTES]
+&lt;codigo&gt;;&lt;vaga1+vaga2...&gt;;porte=&lt;P|M|G&gt;;capacidade=&lt;n&gt;;grupo=&lt;nome&gt;
+[ETIQUETAS]
+&lt;vaga&gt;;&lt;familia&gt;=&lt;valor&gt;;&lt;familia&gt;=&lt;valor&gt;...
+[PRE_ATRIBUIDAS]
+&lt;vaga&gt;;&lt;unidade&gt;;&lt;motivo com fundamento&gt;
+[FORA_DO_POOL]
+&lt;vaga&gt;;&lt;motivo com fundamento&gt;
+</code></pre>
+<p><strong>Campos que merecem explicação:</strong></p>
+<p><code>grupo</code> é a fatia do sorteio a que a unidade e o lote pertencem. Sem divisão,
+todos ficam no grupo <code>GERAL</code> e o sorteio é um só. Com divisão, cada grupo é um
+sorteio independente dentro do mesmo compromisso e da mesma semente: quem está
+no grupo das cobertas concorre apenas às cobertas. Nome de grupo não pode ser
+vazio nem conter <code>;</code> <code>=</code> <code>+</code> <code>[</code> <code>]</code>.</p>
+<p><code>agrupamento</code> diz <strong>qual família de etiquetas</strong> define os grupos, ou <code>NENHUM</code>.
+É informação para quem lê, porque o que rege o cálculo são os campos <code>grupo</code>;
+serve para que a ata possa dizer "dividido por Cobertura" sem ambiguidade.</p>
+<p><code>[ETIQUETAS]</code> descreve cada vaga: cobertura, nível, o que o condomínio quiser
+registrar. Entra no compromisso porque é parte do que se está prometendo.
+Dizer depois que a vaga sorteada era descoberta, quando o compromisso diz
+coberta, passa a ser impossível. Famílias e valores são livres: quem define é o
+condomínio, não o protocolo.</p>
+<p><code>[PRE_ATRIBUIDAS]</code> são as vagas que já têm destino certo e por isso não são
+sorteadas: laudo médico, decisão judicial, permuta homologada, direito
+reconhecido em assembleia. Cada linha traz a vaga, a unidade e o motivo. A vaga
+não aparece em nenhum lote, e o pedido correspondente já foi descontado dos
+<code>tickets</code> da unidade. Ficam no compromisso, e portanto no edital e na ata, pela
+mesma razão que <code>[FORA_DO_POOL]</code>: retirada de vaga que ninguém vê é o modo mais
+comum de fraudar um sorteio honesto.</p>
+<p><code>congelado_em</code> é o instante em que o payload foi fechado, declarado pelo
+organizador. Entra no hash e cumpre duas funções: fixa na própria prova a
+afirmação de que o cadastro estava fechado naquele momento, e permite que o
+verificador recuse, sozinho, um payload que cite rodada drand anterior a ele.
+É declaração unilateral, e por isso não substitui a ata: um organizador
+desonesto pode antedatar. Antedatar, porém, não o ajuda em nada, porque não lhe
+dá acesso ao beacon; o que ele não consegue é pós-datar, e é isso que a
+verificação automática impede.</p>
+<p><code>beacon</code> declara a fonte de aleatoriedade <strong>no primeiro segmento</strong>. É daí que o
+verificador descobre qual fonte deve exigir, e é por isso que não existe campo
+separado para a fonte: seria redundância com possibilidade de divergência.</p>
+<p><code>salt</code> existe para dar entropia ao compromisso. Sem ele, alguém que conheça a
+lista de unidades poderia testar payloads por força bruta e descobrir C antes da
+hora. 128 bits tornam isso inviável.</p>
+<p><code>tickets</code> é quantas vagas a unidade tem direito a disputar. Unidade com duas
+vagas concorre com dois pedidos independentes.</p>
+<p><code>porte</code> do demandante é o tamanho mínimo de vaga que o veículo exige. <code>porte</code> do
+lote é o tamanho da vaga. Um lote serve um pedido quando <code>porte_lote &gt;=
+porte_pedido</code>, na escala <code>P &lt; M &lt; G</code>.</p>
+<p><code>capacidade</code> é quantas unidades cabem no lote. Vaga simples tem capacidade 1.
+Par de vagas presas que será dividido entre dois moradores tem capacidade 2. Box
+duplo entregue inteiro a uma única unidade tem duas vagas e capacidade 1.</p>
+<p><code>[FORA_DO_POOL]</code> lista o que <strong>não</strong> entra no sorteio, com o fundamento de cada
+exclusão. Esta seção é o coração da defesa contra impugnação, porque é publicada
+no edital antes do sorteio: ninguém é surpreendido por uma vaga que sumiu.</p>
+<h3>3.3 Compromisso</h3>
+<pre><code>C = SHA-256( payload_canonico_em_UTF-8 )
+</code></pre>
+<p><code>C</code> em hexadecimal minúsculo é o que vai no edital.</p>
+<hr />
+<h2>4. Beacon</h2>
+<p>Duas fontes são admitidas, e a escolha é <strong>por assembleia</strong>, declarada no campo
+<code>beacon</code>. A escolha depende de quando a assembleia acontece:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Loteria Federal</th>
+<th>drand quicknet</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Quando existe</td>
+<td>quarta e sábado, 20h</td>
+<td>a cada 3 segundos</td>
+</tr>
+<tr>
+<td>Assembleia possível</td>
+<td>quarta ou sábado, antes das 20h</td>
+<td>qualquer dia e hora</td>
+</tr>
+<tr>
+<td>Intervalo t0→t1</td>
+<td>até 15 minutos, congelando às 19h45</td>
+<td>os minutos que se quiser</td>
+</tr>
+<tr>
+<td>Entropia</td>
+<td>~83 bits</td>
+<td>256 bits</td>
+</tr>
+<tr>
+<td>Reconhecimento público</td>
+<td>alto, é a âncora da Portaria MF 41/2008</td>
+<td>baixo, exige explicação</td>
+</tr>
+<tr>
+<td>Conferência pelo condômino</td>
+<td>site da Caixa, jornais, TV</td>
+<td>api.drand.sh, no celular</td>
+</tr>
+<tr>
+<td>Falha possível</td>
+<td>extração adiada ou suspensa</td>
+<td>rede parada, sem precedente relevante</td>
+</tr>
+</tbody>
+</table>
+<p>Na dúvida, e podendo escolher a data, prefira a Federal: a assembleia entende
+sem explicação o que é a Loteria Federal, e o que se está provando é justamente
+confiança. Quando a data não permite, o drand faz o mesmo trabalho e ainda
+encurta a espera.</p>
+<h3>4.1 Loteria Federal</h3>
+<p>Cinco prêmios, cinco dígitos cada. A API da Caixa devolve os números com zero à
+esquerda em seis caracteres: <code>064423</code> é o bilhete <code>64423</code>. <strong>Normalize sempre
+para cinco dígitos</strong>, tomando os cinco últimos, e junte com <code>|</code>:</p>
+<pre><code>064423 083481 037422 027068 057566
+        vira
+64423|83481|37422|27068|57566
+</code></pre>
+<p>Entropia: cinco números de cinco dígitos, cerca de 83 bits. Suficiente para
+qualquer condomínio real.</p>
+<p><strong>Não use</strong> a convenção de promoção comercial de tomar só o último algarismo de
+cada prêmio. Isso derruba a entropia para cerca de 17 bits e permite
+pré-computar todos os resultados possíveis.</p>
+<p>Valor apurado, forma canônica: <code>NNNNN|NNNNN|NNNNN|NNNNN|NNNNN</code>.</p>
+<h3>4.2 drand quicknet</h3>
+<p>Rede de aleatoriedade pública operada por um consórcio de instituições, em
+esquema de limiar: nenhum participante isolado consegue produzir nem antecipar o
+valor de uma rodada. A cadeia <code>quicknet</code> publica uma rodada a cada 3 segundos, e
+a relação entre rodada e horário é pública, fixa e verificável por aritmética:</p>
+<pre><code>cadeia  = 52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971
+genesis = 1692803367   (época Unix)
+periodo = 3            (segundos)
+
+rodada(t)      = floor((t - genesis) / periodo) + 1
+instante(r)    = genesis + (r - 1) * periodo
+url(r)         = https://api.drand.sh/v2/chains/&lt;cadeia&gt;/rounds/&lt;r&gt;
+</code></pre>
+<p><strong>Uso.</strong> No congelamento, calcule <code>rodada(t0 + antecedência)</code> com antecedência
+entre 5 e 15 minutos e cite esse número no campo <code>beacon</code>. Projete a URL da
+rodada na tela: qualquer pessoa presente abre no próprio celular e confere que o
+número transcrito é o que a rede publicou. A aleatoriedade é o campo
+<code>randomness</code> da resposta, 64 caracteres hexadecimais minúsculos.</p>
+<p>Valor apurado, forma canônica: <code>&lt;rodada&gt;|&lt;64 hexadecimais minúsculos&gt;</code>.</p>
+<p><strong>Verificação obrigatória.</strong> A implementação recusa o sorteio quando
+<code>instante(rodada) &lt;= congelado_em</code>. É a checagem que impede citar uma rodada já
+publicada, isto é, escolher a aleatoriedade depois de conhecê-la.</p>
+<p><strong>Limite honesto.</strong> Esta implementação não verifica a assinatura BLS da rodada.
+Ela confia que o número transcrito é o que a rede publicou, e o que sustenta
+essa confiança é a conferência pública na URL, feita por quem quiser, e não o
+cálculo. Quem quiser verificação criptográfica da própria rodada precisa de uma
+biblioteca de curvas BLS, que não cabe em uma página offline de arquivo único.</p>
+<h3>4.3 Contingência</h3>
+<p>A regra de contingência tem que estar declarada <strong>na convocação</strong>, nunca
+decidida na hora, e vai no campo <code>beacon_fallback</code>. Padrão:</p>
+<ul>
+<li>Loteria Federal: se a extração citada não ocorrer, usa-se a primeira seguinte.
+  A assembleia suspende os trabalhos e retoma, ou delibera adiar a apuração,
+  mantendo o mesmo compromisso já lançado em ata.</li>
+<li>drand: se a rodada citada não for obtida, usa-se a rodada seguinte que a
+  contingência declarar. Como a rede publica a cada 3 segundos e mantém as
+  rodadas acessíveis depois, a hipótese prática é falta de internet no local, e
+  não falha da rede.</li>
+</ul>
+<hr />
+<h2>5. Semente</h2>
+<pre><code>semente = HMAC-SHA-256( chave = C, mensagem = &quot;garagem-justa/v1/seed|&quot; + beacon )
+</code></pre>
+<p>HMAC, e não <code>SHA-256(C || beacon)</code>, para evitar ambiguidade de concatenação.</p>
+<p>O organizador controla o payload mas não o beacon. O beacon não sabe que o
+condomínio existe. Nenhum dos dois consegue escolher o resultado, e é por isso
+que o esquema resiste ao ataque de <em>grinding</em>, em que o organizador geraria um
+milhão de sementes e publicaria o hash daquela cujo resultado lhe agrada.</p>
+<hr />
+<h2>6. Gerador determinístico</h2>
+<p>Fluxo de bytes por HMAC em modo contador:</p>
+<pre><code>bloco(i) = HMAC-SHA-256( chave = semente, mensagem = &quot;garagem-justa/v1/prng&quot; || uint32_be(i) )
+</code></pre>
+<p>Os blocos são concatenados na ordem <code>i = 0, 1, 2, ...</code> e consumidos sob demanda.
+Cabe em dez linhas em qualquer linguagem, e essa simplicidade é requisito, não
+elegância: quem vai reimplementar é um condômino curioso.</p>
+<h3>6.1 Inteiro uniforme</h3>
+<pre><code>uniforme(n):
+    se n == 1: retorna 0
+    nbytes = ceil(ceil(log2(n)) / 8)
+    espaco = 2^(8*nbytes)
+    limite = floor(espaco / n) * n
+    repita:
+        x = inteiro big-endian sem sinal dos proximos nbytes bytes
+        se x &lt; limite: retorna x mod n
+        senao: descarta e repete
+</code></pre>
+<p><strong>Nunca</strong> <code>bytes % n</code>. Se <code>n</code> não divide uma potência de 256, os resíduos menores
+saem com mais frequência. A rejeição consome bytes do fluxo, então precisa estar
+implementada exatamente assim, ou duas implementações divergem no primeiro
+descarte.</p>
+<h3>6.2 Embaralhamento</h3>
+<p>Fisher-Yates, variante de Durstenfeld, descendente:</p>
+<pre><code>para i de len(a)-1 ate 1:
+    j = uniforme(i+1)
+    troca a[i] com a[j]
+</code></pre>
+<hr />
+<h2>7. Sorteio</h2>
+<h3>7.1 Construção dos pedidos</h3>
+<p>Para cada demandante, gera-se um pedido por ticket, com identificador
+<code>&lt;codigo&gt;#&lt;k&gt;</code>, <code>k</code> de 1 até <code>tickets</code>. A lista de pedidos é ordenada pelos bytes
+UTF-8 do identificador antes de qualquer embaralhamento.</p>
+<h3>7.2 Grupos</h3>
+<p>Os grupos são os valores distintos de <code>grupo</code> que aparecem em <code>[DEMANDANTES]</code> e
+em <code>[LOTES]</code>, ordenados por <strong>bytes do nome</strong>, não por ordem de digitação nem
+por locale. Cada grupo é percorrido inteiro antes do seguinte.</p>
+<p>Grupo com pedidos e sem lotes deixa todos esses pedidos na regra <code>sem_vaga</code>.
+Grupo com lotes e sem pedidos simplesmente sobra. Nenhum dos dois é erro do
+protocolo: são fatos do cadastro, e é a conferência da aplicação que avisa.</p>
+<h3>7.3 Ordem de consumo do PRNG</h3>
+<p>Declarada e imutável. Para cada grupo, na ordem definida em 7.2:</p>
+<ol>
+<li>permutação dos <strong>pedidos do grupo</strong></li>
+<li>permutação dos <strong>lotes do grupo</strong></li>
+</ol>
+<p>Inverter qualquer parte dessa ordem muda todo o resultado. Sem divisão existe um
+único grupo, <code>GERAL</code>, e a ordem se reduz ao caso simples: embaralha pedidos,
+embaralha lotes.</p>
+<p>Permutação de lista vazia ou de um só elemento não consome byte nenhum do fluxo.</p>
+<h3>7.4 Casamento</h3>
+<p>Percorre-se a permutação de pedidos. Para cada pedido, consideram-se os lotes
+com capacidade restante e porte suficiente, na ordem da permutação de lotes.</p>
+<ul>
+<li><code>PRIMEIRO_ELEGIVEL</code>: pega o primeiro da permutação.</li>
+<li><code>MENOR_ADEQUADO</code>: pega o de menor porte que serve; empate resolvido pela ordem
+  da permutação.</li>
+</ul>
+<p><strong>Use <code>MENOR_ADEQUADO</code>.</strong> As duas políticas são igualmente aleatórias e
+igualmente verificáveis, mas a primeira desperdiça vaga grande com carro
+pequeno. No exemplo de referência, com 19 pedidos e 19 posições, a política
+<code>PRIMEIRO_ELEGIVEL</code> deixa em média 1,41 pedido sem vaga e só consegue atender
+todo mundo em 46 de 500 sorteios; <code>MENOR_ADEQUADO</code> atende todos em 500 de 500.</p>
+<p>Não havendo lote elegível, o pedido vai para a regra declarada em <code>sem_vaga</code>.</p>
+<h3>7.5 Vaga concreta dentro do lote</h3>
+<ul>
+<li><code>capacidade == número de vagas</code>: cada ocupante recebe uma vaga, na ordem em que
+  foi contemplado. É o caso da vaga presa dividida entre dois moradores.</li>
+<li><code>capacidade &lt; número de vagas</code>: o ocupante recebe todas as vagas do lote. É o
+  box duplo entregue a uma única unidade.</li>
+</ul>
+<h3>7.6 Resultado</h3>
+<pre><code>GARAGEM-JUSTA/RESULTADO/v1
+&lt;pedido&gt;;&lt;grupo&gt;;&lt;lote&gt;;&lt;vaga1+vaga2...&gt;
+...
+&lt;pedido&gt;;&lt;grupo&gt;;SEM_VAGA
+...
+</code></pre>
+<p>Atribuições ordenadas pelos bytes UTF-8 do identificador do pedido, seguidas dos
+sem vaga na ordem em que ocorreram.</p>
+<p>As vagas de <code>[PRE_ATRIBUIDAS]</code> <strong>não</strong> entram neste texto: elas não foram
+sorteadas, e o hash do resultado é o hash do que o sorteio produziu. Elas já
+estão no compromisso, que é o que prova que foram declaradas antes.</p>
+<pre><code>hash_resultado = SHA-256( texto_do_resultado )
+</code></pre>
+<hr />
+<h2>8. O que vai para a ata</h2>
+<p>A ata é o que prova a ordem dos fatos, já que o compromisso não saiu no edital.
+Lavre <strong>na ordem em que aconteceram</strong>:</p>
+<ol>
+<li>Que, encerrada a deliberação sobre participantes e vagas sorteáveis, o
+   cadastro foi congelado, exibido na tela, e dele se extraiu o compromisso <code>C</code>,
+   lido em voz alta <strong>antes</strong> de colhida a aleatoriedade.</li>
+<li>O compromisso <code>C</code> e o instante do congelamento.</li>
+<li>A fonte declarada, exatamente como está no campo <code>beacon</code>.
+3.1. A divisão do sorteio, com os grupos e quantos pedidos e posições cada um
+   tinha, e a relação de vagas já destinadas fora do sorteio, com o fundamento
+   de cada uma, lida antes da apuração.</li>
+<li>O valor apurado:</li>
+<li>Loteria Federal: número do concurso e os cinco prêmios.</li>
+<li>drand: número da rodada, os 64 hexadecimais e a URL de conferência.</li>
+<li>A semente derivada.</li>
+<li>O hash do resultado.</li>
+<li>O hash do <code>verificador.html</code> publicado.</li>
+<li>A versão do protocolo, <code>garagem-justa/v1</code>.</li>
+<li>O endereço em que o payload integral e o verificador ficam publicados.</li>
+</ol>
+<p>Anexo: comprovante impresso do resultado, obtido no portal da Caixa ou na URL da
+rodada drand.</p>
+<p>Se um ciclo tiver sido congelado e depois reaberto, ou apurado e depois anulado,
+isso consta da cadeia de eventos e <strong>deve</strong> constar da ata, com o motivo. Omitir
+é o que transformaria uma ferramenta de prova em ferramenta de encenação.</p>
+<hr />
+<h2>9. Como um terceiro confere</h2>
+<ol>
+<li>Abre <code>verificador.html</code>, confere o SHA-256 do arquivo contra o da ata.</li>
+<li>Cola o payload publicado e o valor da fonte:</li>
+<li>Loteria Federal: <code>64423|83481|37422|27068|57566</code></li>
+<li>drand: <code>33071752|8d3c2b1a…</code> (rodada, barra, 64 hexadecimais)</li>
+<li>Confere na origem que aquele valor é o que a fonte publicou: portal da Caixa,
+   ou a URL da rodada em api.drand.sh.</li>
+<li>Compara o commit e o hash do resultado com os da ata.</li>
+</ol>
+<p>Quem preferir não confiar em JavaScript roda <code>python3 core/sorteio.py
+payload.txt "&lt;valor do beacon&gt;"</code> e chega ao mesmo resultado. Duas implementações
+independentes que concordam valem muito mais que uma.</p>
+<hr />
+<h2>10. Limites conhecidos</h2>
+<p><strong>Contingência do beacon é ponto de julgamento.</strong> Se a extração citada não
+ocorrer e a regra de contingência não estiver clara na convocação, abre-se
+espaço para discussão. A regra tem que estar escrita antes.</p>
+<p><strong>Congelar na assembleia desloca prova do papel para a ata.</strong> No modelo em que o
+compromisso sai no edital, a prova de anterioridade é documental e antecede o
+ato. No modelo adotado aqui, ela depende de a ata registrar a ordem correta dos
+fatos. É uma escolha deliberada: o custo é depender do rigor do secretário, e o
+ganho é que o compromisso descreve o cadastro que a assembleia aprovou. Na fonte
+drand parte desse ônus volta a ser automática, porque a aritmética da rodada não
+admite inversão. Quem quiser reforço adicional pode carimbar o payload com
+OpenTimestamps no intervalo entre o congelamento e a apuração, sem custo.</p>
+<p><strong>A assinatura da rodada drand não é verificada.</strong> Ver 4.2. A conferência é
+pública, na URL, e não criptográfica dentro da aplicação.</p>
+<p><strong>O protocolo não sabe quem pode participar.</strong> Legitimidade de condômino,
+inadimplência, procuração e convocação são camadas externas, e são justamente as
+que mais anulam assembleia na prática.</p>
+<p><strong>A divisão em grupos é decisão da assembleia, não do protocolo.</strong> O protocolo
+executa a divisão declarada; ele não julga se dividir cobertas e descobertas por
+unidade é legítimo naquele condomínio. Isso depende da convenção, do que a
+assembleia aprovou e, quando a divisão perpetua vantagem, da própria isonomia
+entre condôminos. Dividir é lícito quando há fundamento; o protocolo só garante
+que a divisão declarada foi a divisão aplicada.</p>
+<p><strong>Porte é declarado, não medido.</strong> Se um morador declarar porte G para aumentar a
+chance de vaga grande, o protocolo não percebe. Isso é controle administrativo,
+resolvido no cadastro e na conferência antes do congelamento.</p>
+<p><strong>O commit não prova que o payload é verdadeiro.</strong> Prova que ele não mudou.</p><hr><p><a href="/core/sorteio.py">sorteio.py</a>, <a href="/core/vetores.json">vetores.json</a> e <a href="/core/teste.py">teste.py</a> ficam publicados para quem quiser reimplementar o protocolo e conferir contra os mesmos vetores.</p>
+</main>
+<footer class="rodape"><div class="wrap">
+  Garagem Justa é operado por Exacto Gestão de Condomínios. O verificador e o
+  motor de sorteio funcionam sem servidor: tudo roda no navegador de quem
+  confere, e nenhum dado é enviado a lugar nenhum.
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,7 @@
+codigo;porte;classificacao;lote;fora_do_pool;motivo
+G1-01;M;AREA_COMUM;;;
+G1-02;P;AREA_COMUM;;;
+G1-06;G;AREA_COMUM;L06;;
+G1-07;G;AREA_COMUM;L06;;
+G1-15;M;AREA_COMUM;;sim;Vaga acessivel, Decreto 9.451/2018 art. 8 par. 3
+G1-20;M;UNIDADE_AUTONOMA;;sim;Matricula propria no RI

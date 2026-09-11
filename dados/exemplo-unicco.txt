@@ -1,0 +1,49 @@
+GARAGEM-JUSTA/COMMIT/v1
+condominio=Condominio Residencial Unicco
+cnpj=00.000.000/0001-00
+assembleia=2026-10-15T20:00:00-03:00
+modalidade=ATRIBUICAO_DIRETA
+politica_casamento=MENOR_ADEQUADO
+beacon=LOTERIA_FEDERAL|concurso 6107|2026-10-14
+beacon_fallback=DRAND_QUICKNET|52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971|33100612
+sem_vaga=LISTA_DE_ESPERA_POR_ORDEM_DE_SORTEIO
+salt=7f3c9a21e8b04d5f6a1c2e9b8d47f350
+regras=Sorteio de vagas de garagem em area comum, ciclo anual. Vagas acessiveis ficam sob administracao do condominio e fora do pool. Unidade com direito a duas vagas concorre com dois pedidos. Lote duplo comporta duas unidades em vagas presas. Pedido sem lote elegivel entra em lista de espera pela ordem sorteada.
+[DEMANDANTES]
+11;APTO 11;tickets=1;porte=M
+12;APTO 12;tickets=1;porte=P
+13;APTO 13;tickets=2;porte=M
+14;APTO 14;tickets=1;porte=G
+21;APTO 21;tickets=1;porte=M
+22;APTO 22;tickets=1;porte=M
+23;APTO 23;tickets=1;porte=P
+24;APTO 24;tickets=2;porte=M
+31;APTO 31;tickets=1;porte=G
+32;APTO 32;tickets=1;porte=M
+33;APTO 33;tickets=1;porte=M
+34;APTO 34;tickets=1;porte=P
+41;APTO 41;tickets=1;porte=M
+42;APTO 42;tickets=2;porte=G
+43;APTO 43;tickets=1;porte=M
+44;APTO 44;tickets=1;porte=M
+[LOTES]
+L01;G1-01;porte=M;capacidade=1
+L02;G1-02;porte=M;capacidade=1
+L03;G1-03;porte=G;capacidade=1
+L04;G1-04;porte=P;capacidade=1
+L05;G1-05;porte=M;capacidade=1
+L06;G1-06+G1-07;porte=G;capacidade=2
+L07;G1-08;porte=M;capacidade=1
+L08;G1-09;porte=M;capacidade=1
+L09;G1-10;porte=P;capacidade=1
+L10;G1-11;porte=G;capacidade=1
+L11;G1-12;porte=M;capacidade=1
+L12;G1-13+G1-14;porte=M;capacidade=2
+L13;G2-01;porte=M;capacidade=1
+L14;G2-02;porte=M;capacidade=1
+L15;G2-03;porte=G;capacidade=1
+L16;G2-04;porte=P;capacidade=1
+L17;G2-05;porte=M;capacidade=1
+[FORA_DO_POOL]
+G1-15;Vaga acessivel, Decreto 9.451/2018 art. 8 par. 3, sob administracao do condominio
+G1-16;Vaga acessivel adicional aprovada em AGE, ata de 12/09/2026

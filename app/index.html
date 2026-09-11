@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Garagem Justa</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<div class="faixa"></div>
+
+<header class="topo">
+  <div class="topo-in">
+    <div class="marca">Garagem Justa<span>protocolo garagem-justa/v1</span></div>
+    <div class="ident" id="ident">Nenhum condomínio carregado</div>
+    <div class="topo-acoes">
+      <button class="b sec" id="btn-novo" type="button">Novo</button>
+      <button class="b sec" id="btn-abrir" type="button">Abrir</button>
+      <button class="b sec" id="btn-exemplo" type="button">Carregar exemplo</button>
+      <button class="b" id="btn-salvar" type="button">Salvar projeto</button>
+      <input type="file" id="arquivo-projeto" accept=".json,application/json" class="oculto">
+    </div>
+  </div>
+</header>
+
+<nav class="abas">
+  <ul>
+    <li><button type="button" data-aba="condominio" aria-current="true">1. Condomínio</button></li>
+    <li><button type="button" data-aba="unidades">2. Unidades <span class="selo" id="selo-unidades">0</span></button></li>
+    <li><button type="button" data-aba="vagas">3. Vagas <span class="selo" id="selo-vagas">0</span></button></li>
+    <li><button type="button" data-aba="lotes">4. Lotes <span class="selo" id="selo-lotes">0</span></button></li>
+    <li><button type="button" data-aba="diretas">5. Diretas <span class="selo" id="selo-diretas">0</span></button></li>
+    <li><button type="button" data-aba="conferencia">6. Conferência <span class="selo" id="selo-conferencia">-</span></button></li>
+    <li><button type="button" data-aba="sorteio">7. Sorteio</button></li>
+    <li><button type="button" data-aba="dossie">8. Dossiê</button></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- 1 ------------------------------------------------------------------ -->
+<section class="aba ativa" id="aba-condominio">
+  <h2>Identificação e regras do ciclo</h2>
+  <p class="sub">Tudo desta tela entra no compromisso, e tudo continua editável
+  até a abertura do sorteio na assembleia. Escreva como quer que apareça na
+  convocação e na ata.</p>
+
+  <div class="cartao">
+    <div class="linha">
+      <div class="campo g"><label for="m-condominio">Condomínio</label>
+        <input type="text" id="m-condominio" data-meta="condominio" placeholder="Condomínio Residencial ..."></div>
+      <div class="campo"><label for="m-cnpj">CNPJ</label>
+        <input type="text" id="m-cnpj" data-meta="cnpj" placeholder="00.000.000/0001-00"></div>
+      <div class="campo"><label for="m-assembleia">Data e hora da assembleia</label>
+        <input type="datetime-local" id="m-assembleia" data-meta="assembleia"></div>
+    </div>
+    <div class="linha">
+      <div class="campo g"><label for="m-agrupamento">Divisão do sorteio</label>
+        <select id="m-agrupamento" data-meta="agrupamento"></select></div>
+      <div class="campo g"><label for="m-semvaga">Regra para quem ficar sem vaga</label>
+        <input type="text" id="m-semvaga" data-meta="sem_vaga" placeholder="LISTA_DE_ESPERA_POR_ORDEM_DE_SORTEIO"></div>
+    </div>
+    <div class="linha">
+      <div class="campo"><label for="m-politica">Política de casamento</label>
+        <select id="m-politica" data-meta="politica_casamento">
+          <option value="MENOR_ADEQUADO">Menor vaga adequada (recomendado)</option>
+          <option value="PRIMEIRO_ELEGIVEL">Primeira vaga elegível</option>
+        </select></div>
+    </div>
+    <div class="linha">
+      <div class="campo"><label for="m-fonte">Fonte de aleatoriedade</label>
+        <select id="m-fonte" data-meta="fonte">
+          <option value="LOTERIA_FEDERAL">Loteria Federal, quarta e sábado às 20h</option>
+          <option value="DRAND_QUICKNET">drand quicknet, qualquer dia e hora</option>
+        </select></div>
+      <div class="campo g" id="campo-federal"><label for="m-beacon">Extração citada na convocação</label>
+        <input type="text" id="m-beacon" data-meta="beacon" placeholder="LOTERIA_FEDERAL|concurso 6107|2026-10-14"></div>
+      <div class="campo p oculto" id="campo-antecedencia"><label for="m-antecedencia">Minutos de antecedência</label>
+        <input type="number" id="m-antecedencia" data-meta="antecedencia" min="2" max="120" step="1"></div>
+      <div class="campo g"><label for="m-fallback">Contingência</label>
+        <input type="text" id="m-fallback" data-meta="beacon_fallback" placeholder="LOTERIA_FEDERAL|concurso 6108|2026-10-17"></div>
+    </div>
+    <div class="linha">
+      <div class="campo g"><label for="m-regras">Regras, em uma linha, como vão para o edital</label>
+        <textarea id="m-regras" data-meta="regras" rows="3"></textarea></div>
+    </div>
+  </div>
+
+  <div class="nota">
+    <b>Divisão do sorteio.</b> Sem divisão, todo mundo concorre a todas as vagas
+    e a sorte decide quem fica com a melhor. Dividindo por uma família de
+    etiquetas, cada unidade concorre só dentro do seu grupo: quem está no grupo
+    das cobertas disputa apenas as cobertas. A divisão é o que a convenção ou a
+    assembleia definiram, e aparece no edital. Cadastre as etiquetas na aba de
+    vagas antes de escolher aqui.
+  </div>
+
+  <div class="nota">
+    <b>Qual fonte escolher.</b> A Loteria Federal é a referência que o público
+    brasileiro reconhece, e a Receita a usa como âncora de sorteios desde a
+    Portaria MF 41/2008. Ela só existe em quarta e sábado às 20h: para usá-la, a
+    assembleia precisa cair num desses dias e começar antes disso. O drand
+    quicknet publica um número aleatório a cada três segundos, assinado por um
+    consórcio de instituições, e serve em qualquer dia e hora: o sistema cita uma
+    rodada de poucos minutos à frente, congela o cadastro, e a rodada nasce
+    depois. Nos dois casos a aleatoriedade não existia quando o compromisso foi
+    gerado, que é a única coisa que a prova exige.
+  </div>
+
+  <div class="nota">
+    <b>A política de casamento importa mais do que parece.</b> As duas são
+    igualmente aleatórias e igualmente verificáveis, mas “primeira vaga elegível”
+    deixa carro pequeno ocupar vaga grande e sobra gente sem vaga. Em simulação
+    com 500 beacons diferentes, ela deixou em média 1,41 pedido sem vaga; a
+    outra atendeu todos em 500 de 500.
+  </div>
+</section>
+
+<!-- 2 ------------------------------------------------------------------ -->
+<section class="aba" id="aba-unidades">
+  <h2>Unidades</h2>
+  <p class="sub">Quem concorre, com quantos pedidos e que tamanho de vaga o
+  veículo exige. “Importar CSV” acrescenta ao que já existe e pula código
+  repetido; “substituir por CSV” apaga o cadastro e põe o arquivo no lugar. Em “pedidos” vai o direito da unidade: vaga já destinada na aba
+  de atribuições diretas consome um pedido automaticamente, e a unidade concorre
+  com o que sobrar.</p>
+
+  <div class="linha">
+    <button class="b sec" id="u-add" type="button">Adicionar unidade</button>
+    <button class="b sec" id="u-importar" type="button">Importar CSV</button>
+    <button class="b sec" id="u-substituir" type="button">Substituir por CSV</button>
+    <button class="b sec" id="u-modelo" type="button">Baixar modelo CSV</button>
+    <input type="file" id="u-arquivo" accept=".csv,text/csv" class="oculto">
+    <div class="campo busca"><input type="search" id="u-filtro" placeholder="filtrar por código, rótulo ou grupo"></div>
+  </div>
+
+  <div class="rolagem">
+    <table>
+      <thead><tr>
+        <th>Código</th><th>Rótulo</th><th>Pedidos</th><th>Porte</th>
+        <th id="u-th-grupo" class="oculto">Grupo</th>
+        <th>Prioridade</th><th>Doc. conferido</th><th></th>
+      </tr></thead>
+      <tbody id="u-corpo"></tbody>
+    </table>
+  </div>
+  <p class="sub" style="margin-top:10px" id="u-resumo"></p>
+</section>
+
+<!-- 3 ------------------------------------------------------------------ -->
+<section class="aba" id="aba-vagas">
+  <h2>Vagas e triagem dominial</h2>
+  <p class="sub">Antes de sortear é preciso saber o que pode ser sorteado. Vaga
+  com matrícula própria e vaga acessória determinada não entram no pool, e o
+  sistema bloqueia. Vaga nova criada pelo condomínio entra aqui a qualquer
+  momento, uma a uma ou por CSV, até a abertura do sorteio. Vaga acessível e qualquer outra retirada por deliberação
+  saem do pool com motivo declarado, que vai para o edital.</p>
+
+  <div class="cartao">
+    <h3>Etiquetas das vagas</h3>
+    <p class="sub" style="margin:0 0 12px">Cadastre as famílias que fizerem
+    sentido para este condomínio e os valores de cada uma: Cobertura com coberta
+    e descoberta, Nível com subsolo e térreo, o que for. Uma vaga pode receber
+    um valor de cada família. Tudo isso entra no compromisso, de modo que
+    ninguém pode dizer depois que a vaga era outra.</p>
+    <div class="rolagem">
+      <table>
+        <thead><tr><th style="width:26%">Família</th><th>Valores, separados por vírgula</th><th style="width:44px"></th></tr></thead>
+        <tbody id="f-corpo"></tbody>
+      </table>
+    </div>
+    <div class="linha" style="margin-top:10px">
+      <button class="b sec" id="f-add" type="button">Adicionar família</button>
+      <button class="b sec" id="f-sugerir" type="button">Usar cobertura e nível</button>
+    </div>
+  </div>
+
+  <div class="linha">
+    <button class="b sec" id="v-add" type="button">Adicionar vaga</button>
+    <button class="b sec" id="v-importar" type="button">Importar CSV</button>
+    <button class="b sec" id="v-substituir" type="button">Substituir por CSV</button>
+    <button class="b sec" id="v-modelo" type="button">Baixar modelo CSV</button>
+    <input type="file" id="v-arquivo" accept=".csv,text/csv" class="oculto">
+    <div class="campo busca"><input type="search" id="v-filtro" placeholder="filtrar por código, etiqueta, lote ou motivo"></div>
+  </div>
+
+  <div class="rolagem">
+    <table>
+      <thead><tr id="v-cabecalho">
+        <th>Código</th><th>Porte</th><th>Classificação dominial</th>
+        <th>Lote</th><th>Fora do pool</th><th>Motivo da retirada</th><th></th>
+      </tr></thead>
+      <tbody id="v-corpo"></tbody>
+    </table>
+  </div>
+  <p class="sub" style="margin-top:10px" id="v-resumo"></p>
+
+  <div class="nota">
+    <b>A coluna “concorre em”.</b> Normalmente ela fica vazia e a vaga concorre
+    no grupo da própria etiqueta. Preencha quando sobrar vaga de um grupo depois
+    de atendidas todas as unidades dele: uma coberta excedente pode concorrer no
+    grupo das descobertas, continuando coberta na descrição e na ata. A
+    conferência avisa toda vez que isso acontece, porque a exceção precisa ir
+    declarada no edital: quem for contemplado leva vantagem sobre os demais do
+    grupo, e isso não pode ser decidido em silêncio.
+  </div>
+</section>
+
+<!-- 4 ------------------------------------------------------------------ -->
+<section class="aba" id="aba-lotes">
+  <h2>Lotes</h2>
+  <p class="sub">Vaga sem código de lote vira um lote sozinha. Vagas com o mesmo
+  código de lote formam um conjunto, o caso típico de vagas presas. A capacidade
+  diz quantas unidades cabem no lote: igual ao número de vagas quando o par é
+  dividido entre dois moradores, ou 1 quando o box inteiro fica com uma unidade só.</p>
+
+  <div class="rolagem">
+    <table>
+      <thead><tr>
+        <th>Lote</th><th>Vagas</th><th>Porte</th><th>Capacidade</th>
+        <th id="l-th-grupo" class="oculto">Grupo</th><th>Situação</th>
+      </tr></thead>
+      <tbody id="l-corpo"></tbody>
+    </table>
+  </div>
+  <p class="sub" style="margin-top:10px" id="l-resumo"></p>
+</section>
+
+<!-- 5 ------------------------------------------------------------------ -->
+<section class="aba" id="aba-diretas">
+  <h2>Atribuições diretas</h2>
+  <p class="sub">Vaga que já tem destino certo e por isso não é sorteada: laudo
+  médico apresentado, decisão judicial, permuta homologada, direito reconhecido
+  em assembleia. Cada linha retira a vaga do pool e consome um pedido da unidade,
+  que continua concorrendo com o que sobrar. O motivo é obrigatório e vai para o
+  edital e para a ata, exatamente como estiver escrito aqui.</p>
+
+  <div class="linha">
+    <button class="b sec" id="a-add" type="button">Adicionar atribuição</button>
+  </div>
+
+  <div class="rolagem">
+    <table>
+      <thead><tr>
+        <th style="width:18%">Unidade</th><th style="width:16%">Vaga</th>
+        <th>Motivo, com o fundamento</th><th style="width:44px"></th>
+      </tr></thead>
+      <tbody id="a-corpo"></tbody>
+    </table>
+  </div>
+  <p class="sub" style="margin-top:10px" id="a-resumo"></p>
+
+  <div class="nota">
+    <b>Isto não é uma porta dos fundos.</b> Toda atribuição direta aparece no
+    bloco da convocação com o nome da unidade, o código da vaga e o motivo, e é
+    lida na abertura antes do sorteio. Quanto mais linhas aqui, menos vagas
+    restam para os demais, e é por isso que cada uma precisa de fundamento que se
+    sustente sozinho diante da assembleia.
+  </div>
+</section>
+
+<!-- 6 ------------------------------------------------------------------ -->
+<section class="aba" id="aba-conferencia">
+  <h2>Conferência e abertura do sorteio</h2>
+  <p class="sub">O cadastro fica aberto até aqui. Unidades, vagas, exceções e
+  regras podem mudar a qualquer momento, inclusive com a assembleia já em curso,
+  enquanto ela delibera. O congelamento é o primeiro ato do sorteio, feito diante
+  de todos: ele cria o compromisso, e daí em diante nada mais muda. Como a
+  aleatoriedade só chega depois, congelar na hora não enfraquece a prova.</p>
+
+  <div class="cartao"><div class="checklist" id="c-lista"></div></div>
+
+  <div class="cartao">
+    <h3>Bloco para a convocação</h3>
+    <p class="sub" style="margin:0 0 10px">Vai no edital, antes da assembleia.
+    Não traz o compromisso, que ainda não existe: anuncia o método, a fonte de
+    aleatoriedade, as vagas fora do sorteio e onde conferir depois.</p>
+    <textarea id="c-edital" rows="12" readonly></textarea>
+    <div class="linha" style="margin-top:10px">
+      <button class="b sec" id="c-copiar-edital" type="button">Copiar bloco da convocação</button>
+    </div>
+  </div>
+
+  <div class="linha">
+    <button class="b" id="c-congelar" type="button">Abrir o sorteio e congelar</button>
+    <button class="b sec oculto" id="c-descongelar" type="button">Reabrir o cadastro</button>
+    <button class="b sec perigo oculto" id="c-anular" type="button">Anular o ciclo</button>
+  </div>
+
+  <div class="cartao oculto" id="c-resultado">
+    <h3>Compromisso gerado</h3>
+    <dl class="kv">
+      <dt>Commit</dt><dd id="c-commit">-</dd>
+      <dt>Congelado em</dt><dd id="c-quando">-</dd>
+      <dt>Fonte declarada</dt><dd id="c-fonte">-</dd>
+      <dt>Pedidos</dt><dd id="c-pedidos">-</dd>
+      <dt>Capacidade</dt><dd id="c-capacidade">-</dd>
+    </dl>
+    <h3>Para ler em voz alta e lançar na ata, antes de apurar</h3>
+    <textarea id="c-abertura" rows="11" readonly></textarea>
+    <div class="linha" style="margin-top:10px">
+      <button class="b sec" id="c-copiar-abertura" type="button">Copiar bloco da abertura</button>
+      <button class="b sec" id="c-baixar-payload" type="button">Baixar payload</button>
+    </div>
+  </div>
+</section>
+
+<!-- 7 ------------------------------------------------------------------ -->
+<section class="aba" id="aba-sorteio">
+  <h2>Sorteio</h2>
+  <p class="sub">A aleatoriedade vem de fora e chega depois do compromisso. O
+  sistema só a transcreve, deriva a semente e apura. Nada aqui usa relógio,
+  sessão ou número aleatório do navegador.</p>
+
+  <div class="cartao" id="s-bloqueio">
+    <p class="sub" style="margin:0">Abra o sorteio na aba de conferência antes de apurar.</p>
+  </div>
+
+  <div class="cartao oculto" id="s-painel">
+    <div id="s-federal">
+      <h3>Prêmios da Loteria Federal</h3>
+      <div class="linha">
+        <div class="campo p"><label for="p1">1º prêmio</label><input type="text" id="p1" inputmode="numeric" maxlength="6"></div>
+        <div class="campo p"><label for="p2">2º prêmio</label><input type="text" id="p2" inputmode="numeric" maxlength="6"></div>
+        <div class="campo p"><label for="p3">3º prêmio</label><input type="text" id="p3" inputmode="numeric" maxlength="6"></div>
+        <div class="campo p"><label for="p4">4º prêmio</label><input type="text" id="p4" inputmode="numeric" maxlength="6"></div>
+        <div class="campo p"><label for="p5">5º prêmio</label><input type="text" id="p5" inputmode="numeric" maxlength="6"></div>
+      </div>
+      <p class="sub" style="margin:0">Zero à esquerda pode ser digitado ou não: 064423 e 64423 dão o mesmo resultado.</p>
+    </div>
+
+    <div id="s-drand" class="oculto">
+      <h3>Rodada do drand citada no compromisso</h3>
+      <dl class="kv">
+        <dt>Rodada</dt><dd id="dr-rodada">-</dd>
+        <dt>Publicação prevista</dt><dd id="dr-quando">-</dd>
+        <dt>Endereço público</dt><dd id="dr-url">-</dd>
+      </dl>
+      <div class="linha">
+        <div class="campo g"><label for="dr-valor">Aleatoriedade da rodada, 64 caracteres hexadecimais</label>
+          <input type="text" id="dr-valor" spellcheck="false" autocomplete="off"></div>
+        <div class="campo p"><label>&nbsp;</label>
+          <button class="b sec" id="dr-buscar" type="button">Buscar na internet</button></div>
+      </div>
+      <p class="sub" style="margin:0">Projete o endereço acima na tela: qualquer
+      pessoa presente pode abri-lo no próprio celular e conferir que o número
+      transcrito é o mesmo. Sem internet, digite à mão.</p>
+    </div>
+
+    <div class="linha" style="margin-top:14px">
+      <button class="b" id="s-rodar" type="button">Apurar</button>
+      <button class="b sec" id="s-apresentar" type="button" disabled>Modo apresentação</button>
+    </div>
+
+    <div class="oculto" id="s-saida">
+      <h3>Apuração</h3>
+      <dl class="kv">
+        <dt>Fonte</dt><dd id="s-fonte">-</dd>
+        <dt>Beacon</dt><dd id="s-beacon">-</dd>
+        <dt>Semente</dt><dd id="s-semente">-</dd>
+        <dt>Hash do resultado</dt><dd id="s-hash">-</dd>
+      </dl>
+      <div class="rolagem" style="max-height:46vh;margin-top:12px">
+        <table>
+          <thead><tr><th>Pedido</th><th>Unidade</th><th id="s-th-grupo" class="oculto">Grupo</th><th>Lote</th><th>Vaga</th></tr></thead>
+          <tbody id="s-corpo"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 ------------------------------------------------------------------ -->
+<section class="aba" id="aba-dossie">
+  <h2>Dossiê probatório</h2>
+  <p class="sub">Os arquivos que sustentam a deliberação se alguém questionar.
+  Guarde junto com a ata e mantenha por dez anos.</p>
+
+  <div class="cartao">
+    <h3>Cadeia de eventos</h3>
+    <p class="sub" style="margin:0 0 10px">Cada evento carrega o hash do anterior.
+    Alterar qualquer linha muda o hash final, que é o que vai assinado na ata.</p>
+    <div class="rolagem" style="max-height:34vh">
+      <table>
+        <thead><tr><th>#</th><th>Quando</th><th>Evento</th><th>Hash</th></tr></thead>
+        <tbody id="d-log"></tbody>
+      </table>
+    </div>
+    <dl class="kv" style="margin-top:12px"><dt>Hash final</dt><dd id="d-hashfinal">-</dd></dl>
+  </div>
+
+  <div class="cartao">
+    <h3>Exportar</h3>
+    <div class="linha">
+      <button class="b sec" id="d-payload" type="button">payload.txt</button>
+      <button class="b sec" id="d-resultado" type="button">resultado.txt</button>
+      <button class="b sec" id="d-ata" type="button">trecho-da-ata.md</button>
+      <button class="b sec" id="d-planilha" type="button">resultado.csv</button>
+      <button class="b sec" id="d-cadeia" type="button">cadeia-de-eventos.txt</button>
+      <button class="b" id="d-tudo" type="button">Projeto completo (.json)</button>
+    </div>
+  </div>
+
+  <div class="nota">
+    <b>O verificador anda junto.</b> Publique <span class="mono">verificador.html</span>
+    em endereço acessível, registre o SHA-256 dele na ata e cite o endereço. É o
+    que permite a um condômino refazer a conta sozinho, e é o que transforma a
+    alegação de fraude em algo que se responde com um arquivo em vez de com a
+    palavra do síndico.
+  </div>
+</section>
+
+</main>
+
+<footer class="rodape">
+  Aplicação local. Nada sai deste computador: não há servidor, não há envio de
+  dados, e ela funciona sem internet. O projeto vive no arquivo .json que você
+  salva. Operada pela Exacto Gestão de Condomínios.
+</footer>
+
+<!-- telão ------------------------------------------------------------- -->
+<div id="apresentacao">
+  <div class="ap-topo">
+    <div class="ap-ident">
+      <div class="ap-sobre" id="ap-sobre">Assembleia</div>
+      <h2 id="ap-titulo">Sorteio de vagas de garagem</h2>
+      <div class="ap-cond" id="ap-cond"></div>
+    </div>
+    <div class="ap-meta" id="ap-meta"></div>
+  </div>
+  <div class="ap-corpo"><div id="ap-lista"></div></div>
+  <div class="ap-rodape">
+    <button class="b" id="ap-proximo" type="button">Revelar próxima</button>
+    <button class="b sec" id="ap-todas" type="button">Revelar todas</button>
+    <span class="progresso" id="ap-progresso"></span>
+    <button class="b sec" id="ap-fechar" type="button" style="margin-left:auto">Fechar</button>
+  </div>
+</div>
+
+<div id="aviso-flutuante"></div>
+
+<script src="../core/sorteio.browser.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

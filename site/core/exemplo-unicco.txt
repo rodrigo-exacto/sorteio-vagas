@@ -1,0 +1,74 @@
+GARAGEM-JUSTA/COMMIT/v1
+condominio=Condominio Residencial Unicco
+cnpj=00.000.000/0001-00
+assembleia=2026-10-14T19:30:00-03:00
+congelado_em=2026-10-14T19:47:00-03:00
+modalidade=ATRIBUICAO_DIRETA
+politica_casamento=MENOR_ADEQUADO
+agrupamento=Cobertura
+beacon=LOTERIA_FEDERAL|concurso 6107|2026-10-14
+beacon_fallback=LOTERIA_FEDERAL|concurso 6108|2026-10-17
+sem_vaga=LISTA_DE_ESPERA_POR_ORDEM_DE_SORTEIO
+salt=7f3c9a21e8b04d5f6a1c2e9b8d47f350
+regras=Sorteio de vagas de garagem em area comum, ciclo anual. Cada unidade concorre dentro do seu grupo de cobertura, na forma da convencao. Vagas acessiveis ficam sob administracao do condominio e fora do pool. Unidade com direito a duas vagas concorre com dois pedidos. Lote duplo comporta duas unidades em vagas presas. Pedido sem lote elegivel entra em lista de espera pela ordem sorteada.
+[DEMANDANTES]
+11;APTO 11;tickets=1;porte=M;grupo=Coberta
+12;APTO 12;tickets=1;porte=P;grupo=Coberta
+13;APTO 13;tickets=2;porte=M;grupo=Coberta
+14;APTO 14;tickets=1;porte=G;grupo=Coberta
+21;APTO 21;tickets=1;porte=M;grupo=Coberta
+22;APTO 22;tickets=1;porte=M;grupo=Coberta
+23;APTO 23;tickets=1;porte=P;grupo=Coberta
+24;APTO 24;tickets=2;porte=M;grupo=Coberta
+31;APTO 31;tickets=1;porte=G;grupo=Descoberta
+32;APTO 32;tickets=1;porte=M;grupo=Descoberta
+33;APTO 33;tickets=1;porte=M;grupo=Descoberta
+34;APTO 34;tickets=1;porte=P;grupo=Descoberta
+41;APTO 41;tickets=1;porte=M;grupo=Descoberta
+42;APTO 42;tickets=1;porte=G;grupo=Descoberta
+43;APTO 43;tickets=1;porte=M;grupo=Descoberta
+44;APTO 44;tickets=1;porte=M;grupo=Descoberta
+[LOTES]
+L01;G1-01;porte=M;capacidade=1;grupo=Coberta
+L02;G1-02;porte=M;capacidade=1;grupo=Coberta
+L03;G1-03;porte=G;capacidade=1;grupo=Coberta
+L04;G1-04;porte=P;capacidade=1;grupo=Coberta
+L05;G1-05;porte=M;capacidade=1;grupo=Coberta
+L06;G1-06+G1-07;porte=G;capacidade=2;grupo=Coberta
+L07;G1-08;porte=M;capacidade=1;grupo=Coberta
+L08;G1-09;porte=M;capacidade=1;grupo=Coberta
+L09;G1-10;porte=P;capacidade=1;grupo=Coberta
+L10;G2-01;porte=G;capacidade=1;grupo=Descoberta
+L11;G2-02;porte=G;capacidade=1;grupo=Descoberta
+L12;G2-03+G2-04;porte=M;capacidade=2;grupo=Descoberta
+L13;G2-05;porte=M;capacidade=1;grupo=Descoberta
+L14;G2-06;porte=P;capacidade=1;grupo=Descoberta
+L15;G2-07;porte=M;capacidade=1;grupo=Descoberta
+L16;G2-08;porte=M;capacidade=1;grupo=Descoberta
+[ETIQUETAS]
+G1-01;Cobertura=Coberta;Nivel=Subsolo
+G1-02;Cobertura=Coberta;Nivel=Subsolo
+G1-03;Cobertura=Coberta;Nivel=Subsolo
+G1-04;Cobertura=Coberta;Nivel=Subsolo
+G1-05;Cobertura=Coberta;Nivel=Subsolo
+G1-06;Cobertura=Coberta;Nivel=Subsolo
+G1-07;Cobertura=Coberta;Nivel=Subsolo
+G1-08;Cobertura=Coberta;Nivel=Subsolo
+G1-09;Cobertura=Coberta;Nivel=Subsolo
+G1-10;Cobertura=Coberta;Nivel=Subsolo
+G1-11;Cobertura=Coberta;Nivel=Subsolo
+G1-12;Cobertura=Coberta;Nivel=Subsolo
+G2-01;Cobertura=Descoberta;Nivel=Patio
+G2-02;Cobertura=Descoberta;Nivel=Patio
+G2-03;Cobertura=Descoberta;Nivel=Patio
+G2-04;Cobertura=Descoberta;Nivel=Patio
+G2-05;Cobertura=Descoberta;Nivel=Patio
+G2-06;Cobertura=Descoberta;Nivel=Patio
+G2-07;Cobertura=Descoberta;Nivel=Patio
+G2-08;Cobertura=Descoberta;Nivel=Patio
+G2-09;Cobertura=Descoberta;Nivel=Patio
+[PRE_ATRIBUIDAS]
+G2-09;42;Vaga contigua a rampa destinada a unidade 42 por laudo medico apresentado, deliberado em AGE de 12/09/2026
+[FORA_DO_POOL]
+G1-11;Vaga acessivel, Decreto 9.451/2018 art. 8 par. 3, sob administracao do condominio
+G1-12;Vaga acessivel adicional aprovada em AGE, ata de 12/09/2026

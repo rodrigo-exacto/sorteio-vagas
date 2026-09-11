@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verificador independente — Garagem Justa</title>
+<style>
+/* Sem fontes externas, sem CDN, sem bundler: este arquivo tem que funcionar
+   offline daqui a dez anos, salvo em um pen drive, sem internet nenhuma. */
+:root{
+  --ground:#edeee9; --panel:#fff; --panel2:#f6f7f2;
+  --ink:#16191c; --ink2:#3e454b; --muted:#636b71;
+  --rule:#dbddd6; --rule2:#bec2b9;
+  --marca:#a8802f; --marca-ink:#7a5c1e;
+  --ok:#2c6b4f; --ok-bg:#e2efe8;
+  --erro:#9b3128; --erro-bg:#f7e3e0;
+  --aviso:#7f6427; --aviso-bg:#f4ebd5;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --ground:#14161a; --panel:#1c1f24; --panel2:#23272d;
+    --ink:#f0ede4; --ink2:#c6c3b9; --muted:#939790;
+    --rule:#2c3137; --rule2:#3e444b;
+    --marca:#d8b45e; --marca-ink:#d8b45e;
+    --ok:#6dbe93; --ok-bg:#1a2c22;
+    --erro:#dd8077; --erro-bg:#33201d;
+    --aviso:#d8b45e; --aviso-bg:#302814;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:15px/1.55 var(--sans)}
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px 64px}
+header{border-bottom:1px solid var(--rule);background:var(--panel);margin-bottom:26px}
+header .wrap{padding-block:26px 22px}
+h1{font-size:21px;margin:0 0 4px;letter-spacing:-.01em}
+h1 small{font-weight:400;color:var(--muted);font-size:14px;letter-spacing:0}
+header p{margin:8px 0 0;color:var(--ink2);max-width:70ch}
+h2{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+@media (max-width:800px){.cols{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:16px}
+label{display:block;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:0 0 4px;font-weight:600}
+.hint{font-size:12.5px;color:var(--muted);margin:0 0 6px}
+textarea,input[type=text]{width:100%;font:13px/1.5 var(--mono);color:var(--ink);background:var(--ground);
+  border:1px solid var(--rule);border-radius:4px;padding:8px 10px;resize:vertical}
+textarea:focus,input:focus{outline:2px solid var(--marca);outline-offset:1px}
+.field{margin-bottom:14px}
+button{font:600 14px var(--sans);background:var(--ink);color:var(--ground);border:0;border-radius:4px;
+  padding:10px 18px;cursor:pointer}
+button:hover{background:var(--ink2)}
+button:focus-visible{outline:2px solid var(--marca);outline-offset:2px}
+.veredito{border-radius:6px;padding:14px 16px;margin-bottom:16px;border:1px solid transparent;display:none}
+.veredito.on{display:block}
+.veredito b{display:block;font-size:16px;margin-bottom:3px}
+.v-ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.v-erro{background:var(--erro-bg);border-color:var(--erro);color:var(--erro)}
+.v-aviso{background:var(--aviso-bg);border-color:var(--aviso);color:var(--aviso)}
+dl.kv{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;margin:0 0 16px;font-size:13px}
+dl.kv dt{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;padding-top:2px}
+.mono{font-family:var(--mono);font-size:12px}
+dl.kv dd{margin:0;font-family:var(--mono);font-size:12.5px;word-break:break-all;color:var(--ink2)}
+table{border-collapse:collapse;width:100%;font-size:13px;font-family:var(--mono)}
+th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--rule)}
+th{font:600 11px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+  background:var(--panel2);position:sticky;top:0}
+.rolagem{max-height:420px;overflow:auto;border:1px solid var(--rule);border-radius:5px;background:var(--panel)}
+.sem{color:var(--erro)}
+.pre{color:var(--muted)}
+footer{margin-top:28px;padding-top:16px;border-top:1px solid var(--rule);font-size:13px;color:var(--muted)}
+footer code{font-family:var(--mono);font-size:12px}
+</style>
+</head>
+<body>
+
+<header><div class="wrap">
+  <h1>Verificador independente <small>Garagem Justa · protocolo garagem-justa/v1</small></h1>
+  <p>Cole o payload congelado na assembleia e o valor da fonte de aleatoriedade.
+  Esta página recalcula o sorteio do zero e diz se bate com o que foi apurado.
+  Roda inteiramente no seu navegador, sem enviar nada para lugar nenhum, e
+  funciona offline: salve o arquivo e ele continua valendo.</p>
+</div></header>
+
+<div class="wrap">
+
+  <div id="veredito" class="veredito"></div>
+
+  <div class="cols">
+    <div class="card">
+      <h2>Insumos</h2>
+
+      <div class="field">
+        <label for="payload">Payload do compromisso</label>
+        <p class="hint">O texto integral do conjunto congelado na abertura do sorteio,
+        cujo resumo criptográfico foi lido em voz alta e lançado em ata.</p>
+        <textarea id="payload" rows="14" spellcheck="false"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="beacon">Valor do beacon</label>
+        <p class="hint">Loteria Federal: os cinco prêmios com cinco dígitos, separados
+        por barra vertical, como <span class="mono">64423|83481|37422|27068|57566</span>.
+        drand: o número da rodada, barra vertical e os 64 caracteres da aleatoriedade,
+        como <span class="mono">33071752|8d3c2b…</span>. A página recusa valor que não
+        corresponda à fonte declarada dentro do payload.</p>
+        <input type="text" id="beacon" spellcheck="false" value="64423|83481|37422|27068|57566">
+      </div>
+
+      <div class="field">
+        <label for="commitEsperado">Compromisso lançado na ata (opcional)</label>
+        <input type="text" id="commitEsperado" spellcheck="false" placeholder="sha256 em hexadecimal">
+      </div>
+
+      <div class="field">
+        <label for="hashEsperado">Hash do resultado na ata (opcional)</label>
+        <input type="text" id="hashEsperado" spellcheck="false" placeholder="sha256 em hexadecimal">
+      </div>
+
+      <button id="btn" type="button">Verificar</button>
+    </div>
+
+    <div class="card">
+      <h2>Apuração recalculada</h2>
+      <dl class="kv">
+        <dt>Divisão do sorteio</dt><dd id="o-agrupamento">-</dd>
+        <dt>Fonte declarada</dt><dd id="o-fonte">-</dd>
+        <dt>Congelado em</dt><dd id="o-congelado">-</dd>
+        <dt>Commit</dt><dd id="o-commit">-</dd>
+        <dt>Semente</dt><dd id="o-semente">-</dd>
+        <dt>Hash do resultado</dt><dd id="o-hash">-</dd>
+        <dt>Política</dt><dd id="o-politica">-</dd>
+      </dl>
+      <div class="rolagem">
+        <table>
+          <thead><tr><th>Pedido</th><th>Unidade</th><th>Grupo</th><th>Lote</th><th>Vaga</th></tr></thead>
+          <tbody id="o-tabela"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Confira o SHA-256 deste arquivo contra o valor registrado na ata antes de
+    confiar no que ele diz. No terminal: <code>sha256sum verificador.html</code>
+    no Linux ou <code>certutil -hashfile verificador.html SHA256</code> no Windows.
+    A mesma conta pode ser refeita com <code>sorteio.py</code>, em Python, por
+    quem preferir não confiar em JavaScript.
+  </footer>
+
+</div>
+
+<script type="module">
+/* ==========================================================================
+   Motor de sorteio, embutido aqui de propósito.
+   Este arquivo não importa nada de fora e não depende de servidor: é isso que
+   o torna verificável de forma independente. É uma cópia fiel de core/sorteio.mjs;
+   core/teste.py garante que a versão em Python chega ao mesmo resultado.
+   ========================================================================== */
+const PROTO = "garagem-justa/v1";
+const CABECALHO = "GARAGEM-JUSTA/COMMIT/v1";
+const CAMPOS_ORDEM = ["condominio","cnpj","assembleia","congelado_em","modalidade","politica_casamento","agrupamento",
+  "beacon","beacon_fallback","sem_vaga","salt","regras"];
+const PORTES = { P:1, M:2, G:3 };
+const enc = new TextEncoder();
+
+const hex = (b) => Array.from(b, (x) => x.toString(16).padStart(2,"0")).join("");
+function concat(...ps){const t=ps.reduce((s,p)=>s+p.length,0);const o=new Uint8Array(t);let f=0;
+  for(const p of ps){o.set(p,f);f+=p.length;}return o;}
+function u32be(n){const b=new Uint8Array(4);new DataView(b.buffer).setUint32(0,n,false);return b;}
+const sha256 = async (b) => new Uint8Array(await crypto.subtle.digest("SHA-256", b));
+async function hmac(k,m){const key=await crypto.subtle.importKey("raw",k,{name:"HMAC",hash:"SHA-256"},false,["sign"]);
+  return new Uint8Array(await crypto.subtle.sign("HMAC",key,m));}
+function cmpBytes(a,b){const A=enc.encode(a),B=enc.encode(b),n=Math.min(A.length,B.length);
+  for(let i=0;i<n;i++){if(A[i]!==B[i])return A[i]-B[i];}return A.length-B.length;}
+
+const normalizarEntrada = (t) => t.normalize("NFC").replace(/\r\n?/g,"\n").replace(/\n+$/,"");
+
+const GRUPO_UNICO="GERAL";
+const grupoDe = (x) => ((x.grupo||"").trim()===""?GRUPO_UNICO:(x.grupo||"").trim());
+
+function serializePayload(s){
+  const L=[CABECALHO];
+  for(const c of CAMPOS_ORDEM){
+    const v=s.meta[c];
+    if(v===undefined||v==="")throw new Error("campo obrigatório ausente: "+c);
+    L.push(c+"="+String(v).trim());
+  }
+  L.push("[DEMANDANTES]");
+  for(const d of [...s.demandantes].sort((a,b)=>cmpBytes(a.codigo,b.codigo)))
+    L.push(`${d.codigo};${d.rotulo};tickets=${d.tickets};porte=${d.porte};grupo=${grupoDe(d)}`);
+  L.push("[LOTES]");
+  for(const l of [...s.lotes].sort((a,b)=>cmpBytes(a.codigo,b.codigo)))
+    L.push(`${l.codigo};${l.vagas.join("+")};porte=${l.porte};capacidade=${l.capacidade};grupo=${grupoDe(l)}`);
+  L.push("[ETIQUETAS]");
+  for(const e of [...(s.etiquetas||[])].sort((a,b)=>cmpBytes(a.vaga,b.vaga))){
+    const pares=Object.keys(e.valores).sort(cmpBytes).map(f=>`${f}=${e.valores[f]}`);
+    if(pares.length) L.push(`${e.vaga};${pares.join(";")}`);
+  }
+  L.push("[PRE_ATRIBUIDAS]");
+  for(const a of [...(s.preAtribuidas||[])].sort((x,y)=>cmpBytes(x.vaga,y.vaga)))
+    L.push(`${a.vaga};${a.unidade};${a.motivo}`);
+  L.push("[FORA_DO_POOL]");
+  for(const f of [...(s.foraDoPool||[])].sort((a,b)=>cmpBytes(a.vaga,b.vaga)))
+    L.push(`${f.vaga};${f.motivo}`);
+  return L.join("\n").normalize("NFC");
+}
+
+function parsePayload(texto){
+  const linhas = normalizarEntrada(texto).split("\n");
+  if(linhas[0]!==CABECALHO) throw new Error("payload não começa com "+CABECALHO);
+  const meta={},demandantes=[],lotes=[],etiquetas=[],preAtribuidas=[],foraDoPool=[];let secao="META";
+  for(let i=1;i<linhas.length;i++){
+    const L=linhas[i];
+    if(L==="") throw new Error(`linha ${i+1}: payload canônico não tem linha em branco`);
+    if(L!==L.trim()) throw new Error(`linha ${i+1}: espaço no início ou no fim não é permitido`);
+    if(L==="[DEMANDANTES]"){secao="DEMANDANTES";continue;}
+    if(L==="[LOTES]"){secao="LOTES";continue;}
+    if(L==="[ETIQUETAS]"){secao="ETIQUETAS";continue;}
+    if(L==="[PRE_ATRIBUIDAS]"){secao="PRE_ATRIBUIDAS";continue;}
+    if(L==="[FORA_DO_POOL]"){secao="FORA_DO_POOL";continue;}
+    if(secao==="META"){
+      const eq=L.indexOf("="); if(eq<1) throw new Error(`linha ${i+1}: esperado campo=valor`);
+      meta[L.slice(0,eq)]=L.slice(eq+1);
+    } else if(secao==="DEMANDANTES"){
+      const [codigo,rotulo,...r]=L.split(";");const kv=kvp(r,i+1);
+      demandantes.push({codigo,rotulo,tickets:inteiro(kv.tickets,"tickets",i+1),
+                        porte:porte(kv.porte,i+1),grupo:nome(kv.grupo,"grupo",i+1)});
+    } else if(secao==="LOTES"){
+      const [codigo,vagas,...r]=L.split(";");const kv=kvp(r,i+1);
+      lotes.push({codigo,vagas:vagas.split("+"),porte:porte(kv.porte,i+1),
+                  capacidade:inteiro(kv.capacidade,"capacidade",i+1),
+                  grupo:nome(kv.grupo,"grupo",i+1)});
+    } else if(secao==="ETIQUETAS"){
+      const [vaga,...r]=L.split(";");
+      if(!vaga||!r.length) throw new Error(`linha ${i+1}: esperado vaga;familia=valor`);
+      etiquetas.push({vaga,valores:kvp(r,i+1)});
+    } else if(secao==="PRE_ATRIBUIDAS"){
+      const p=L.split(";");
+      if(p.length<3) throw new Error(`linha ${i+1}: esperado vaga;unidade;motivo`);
+      preAtribuidas.push({vaga:p[0],unidade:p[1],motivo:p.slice(2).join(";")});
+    } else {
+      const idx=L.indexOf(";"); if(idx<1) throw new Error(`linha ${i+1}: esperado vaga;motivo`);
+      foraDoPool.push({vaga:L.slice(0,idx),motivo:L.slice(idx+1)});
+    }
+  }
+  for(const c of CAMPOS_ORDEM) if(meta[c]===undefined) throw new Error("campo obrigatório ausente: "+c);
+  return {meta,demandantes,lotes,etiquetas,preAtribuidas,foraDoPool};
+}
+function kvp(ps,n){const kv={};for(const p of ps){const eq=p.indexOf("=");
+  if(eq<1)throw new Error(`linha ${n}: esperado chave=valor em "${p}"`);kv[p.slice(0,eq)]=p.slice(eq+1);}return kv;}
+function inteiro(v,nome,n){if(!/^[1-9][0-9]*$/.test(v??""))throw new Error(`linha ${n}: ${nome} deve ser inteiro positivo`);return Number(v);}
+function porte(v,n){if(!(v in PORTES))throw new Error(`linha ${n}: porte deve ser P, M ou G`);return v;}
+function nome(v,campo,n){const t=(v??"").trim();
+  if(t==="")throw new Error(`linha ${n}: ${campo} não pode ser vazio`);
+  if(/[;=+\[\]]/.test(t))throw new Error(`linha ${n}: ${campo} não pode conter ; = + [ ]`);return t;}
+
+function assertCanonico(t){
+  const spec=parsePayload(t);
+  if(serializePayload(spec)!==normalizarEntrada(t))
+    throw new Error("payload não está na forma canônica (ordem, espaços ou normalização divergem)");
+  return spec;
+}
+
+function criarPrng(semente){
+  let buf=new Uint8Array(0),ctr=0;
+  return {async proximos(n){
+    while(buf.length<n) buf=concat(buf, await hmac(semente, concat(enc.encode(PROTO+"/prng"),u32be(ctr++))));
+    const o=buf.slice(0,n); buf=buf.slice(n); return o;
+  }};
+}
+async function uniforme(prng,n){
+  if(n<1) throw new Error("n deve ser >= 1");
+  if(n===1) return 0;
+  const nbytes=Math.ceil(Math.ceil(Math.log2(n))/8);
+  const espaco=2n**BigInt(8*nbytes), limite=(espaco/BigInt(n))*BigInt(n);
+  for(;;){
+    const b=await prng.proximos(nbytes); let x=0n;
+    for(const by of b) x=(x<<8n)|BigInt(by);
+    if(x<limite) return Number(x%BigInt(n));
+  }
+}
+async function embaralhar(lista,prng){
+  const a=lista.slice();
+  for(let i=a.length-1;i>0;i--){const j=await uniforme(prng,i+1);const t=a[i];a[i]=a[j];a[j]=t;}
+  return a;
+}
+
+function serializarResultado(atrib,sem){
+  const L=["GARAGEM-JUSTA/RESULTADO/v1"];
+  for(const a of atrib) L.push(`${a.pedido};${a.grupo};${a.lote};${a.vagas.join("+")}`);
+  for(const s of sem)  L.push(`${s.pedido};${s.grupo};SEM_VAGA`);
+  return L.join("\n");
+}
+
+/* Fontes de aleatoriedade admitidas. A fonte é o primeiro segmento do campo
+   beacon do payload, e portanto está dentro do compromisso. */
+const DRAND={cadeia:"52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971",
+             genesis:1692803367, periodo:3};
+const FONTES=["LOTERIA_FEDERAL","DRAND_QUICKNET"];
+
+function instanteDaRodada(r){ return (DRAND.genesis + (Number(r)-1)*DRAND.periodo)*1000; }
+function urlDaRodada(r){ return `https://api.drand.sh/v2/chains/${DRAND.cadeia}/rounds/${Number(r)}`; }
+
+function fonteDoBeacon(decl){
+  const f=String(decl).split("|")[0];
+  if(FONTES.indexOf(f)===-1) throw new Error("fonte de aleatoriedade desconhecida: "+f);
+  return f;
+}
+function rodadaDeclarada(decl){
+  const p=String(decl).split("|");
+  if(p[1]!==DRAND.cadeia) throw new Error("a cadeia citada no beacon não é a quicknet do drand");
+  if(!/^[1-9][0-9]*$/.test(p[2]||"")) throw new Error("o beacon do drand deve terminar com o número da rodada");
+  return Number(p[2]);
+}
+function validarBeacon(decl, valor, congeladoEm){
+  const fonte=fonteDoBeacon(decl);
+  if(fonte==="LOTERIA_FEDERAL"){
+    if(!/^[0-9]{5}(\|[0-9]{5}){4}$/.test(valor))
+      throw new Error("valor da Loteria Federal fora do formato: cinco prêmios de cinco dígitos");
+    return fonte;
+  }
+  const rodada=rodadaDeclarada(decl);
+  if(!/^[1-9][0-9]*\|[0-9a-f]{64}$/.test(valor))
+    throw new Error("valor do drand fora do formato: rodada|aleatoriedade");
+  if(Number(valor.split("|")[0])!==rodada)
+    throw new Error(`a rodada apurada (${valor.split("|")[0]}) não é a rodada do compromisso (${rodada})`);
+  const t=Date.parse(congeladoEm);
+  if(Number.isNaN(t)) throw new Error("congelado_em não é uma data válida: "+congeladoEm);
+  if(instanteDaRodada(rodada)<=t)
+    throw new Error("a rodada citada já existia quando o ciclo foi congelado: o compromisso não antecede a aleatoriedade");
+  return fonte;
+}
+
+async function sortear(payloadTexto, beaconValor){
+  const spec=assertCanonico(payloadTexto);
+  const fonte=validarBeacon(spec.meta.beacon, beaconValor, spec.meta.congelado_em);
+  const C=await sha256(enc.encode(normalizarEntrada(payloadTexto)));
+  const semente=await hmac(C, enc.encode(`${PROTO}/seed|${beaconValor}`));
+  const prng=criarPrng(semente);
+
+  const pedidos=[];
+  for(const d of spec.demandantes)
+    for(let k=1;k<=d.tickets;k++)
+      pedidos.push({id:`${d.codigo}#${k}`,codigo:d.codigo,rotulo:d.rotulo,
+                    porte:d.porte,grupo:grupoDe(d)});
+  pedidos.sort((a,b)=>cmpBytes(a.id,b.id));
+
+  const politica=spec.meta.politica_casamento;
+  if(politica!=="PRIMEIRO_ELEGIVEL"&&politica!=="MENOR_ADEQUADO")
+    throw new Error("politica_casamento desconhecida: "+politica);
+
+  // Um sorteio por grupo, na ordem crescente de bytes do nome do grupo.
+  const grupos=[...new Set([...pedidos.map(p=>p.grupo),...spec.lotes.map(grupoDe)])].sort(cmpBytes);
+
+  const atribuicoes=[], semVaga=[], ordemSorteada=[];
+
+  for(const grupo of grupos){
+    const pedidosG=pedidos.filter(p=>p.grupo===grupo);
+    const lotesG=spec.lotes.filter(l=>grupoDe(l)===grupo);
+    const permPedidos=await embaralhar(pedidosG,prng);
+    const permLotes=await embaralhar(lotesG,prng);
+    for(const p of permPedidos) ordemSorteada.push(p.id);
+
+    const restante=new Map(permLotes.map(l=>[l.codigo,l.capacidade]));
+
+    for(const pedido of permPedidos){
+      const livres=permLotes.filter(l=>restante.get(l.codigo)>0 && PORTES[l.porte]>=PORTES[pedido.porte]);
+      let esc=null;
+      if(livres.length){
+        esc = politica==="PRIMEIRO_ELEGIVEL"
+          ? livres[0]
+          : livres.reduce((m,l)=>PORTES[l.porte]<PORTES[m.porte]?l:m);
+      }
+      if(!esc){ semVaga.push({pedido:pedido.id,rotulo:pedido.rotulo,porte:pedido.porte,grupo}); continue; }
+      const indice=esc.capacidade-restante.get(esc.codigo);
+      const vagas = esc.capacidade===esc.vagas.length ? [esc.vagas[indice]] : esc.vagas;
+      restante.set(esc.codigo,restante.get(esc.codigo)-1);
+      atribuicoes.push({pedido:pedido.id,codigo:pedido.codigo,rotulo:pedido.rotulo,
+                        grupo,lote:esc.codigo,vagas});
+    }
+  }
+
+  const apresentacao=atribuicoes.slice().sort((a,b)=>cmpBytes(a.pedido,b.pedido));
+  const texto=serializarResultado(apresentacao,semVaga);
+  return {
+    commit:hex(C), semente:hex(semente), politica, fonte,
+    agrupamento:spec.meta.agrupamento, grupos,
+    preAtribuidas:spec.preAtribuidas||[],
+    beaconDeclarado:spec.meta.beacon, congeladoEm:spec.meta.congelado_em,
+    atribuicoes:apresentacao, semVaga,
+    resultadoHash:hex(await sha256(enc.encode(texto))),
+  };
+}
+
+/* ==========================================================================
+   Interface
+   ========================================================================== */
+const $ = (id) => document.getElementById(id);
+
+const EXEMPLO = `GARAGEM-JUSTA/COMMIT/v1
+condominio=Condominio Residencial Unicco
+cnpj=00.000.000/0001-00
+assembleia=2026-10-14T19:30:00-03:00
+congelado_em=2026-10-14T19:47:00-03:00
+modalidade=ATRIBUICAO_DIRETA
+politica_casamento=MENOR_ADEQUADO
+agrupamento=Cobertura
+beacon=LOTERIA_FEDERAL|concurso 6107|2026-10-14
+beacon_fallback=LOTERIA_FEDERAL|concurso 6108|2026-10-17
+sem_vaga=LISTA_DE_ESPERA_POR_ORDEM_DE_SORTEIO
+salt=7f3c9a21e8b04d5f6a1c2e9b8d47f350
+regras=Sorteio de vagas de garagem em area comum, ciclo anual. Cada unidade concorre dentro do seu grupo de cobertura, na forma da convencao. Vagas acessiveis ficam sob administracao do condominio e fora do pool. Unidade com direito a duas vagas concorre com dois pedidos. Lote duplo comporta duas unidades em vagas presas. Pedido sem lote elegivel entra em lista de espera pela ordem sorteada.
+[DEMANDANTES]
+11;APTO 11;tickets=1;porte=M;grupo=Coberta
+12;APTO 12;tickets=1;porte=P;grupo=Coberta
+13;APTO 13;tickets=2;porte=M;grupo=Coberta
+14;APTO 14;tickets=1;porte=G;grupo=Coberta
+21;APTO 21;tickets=1;porte=M;grupo=Coberta
+22;APTO 22;tickets=1;porte=M;grupo=Coberta
+23;APTO 23;tickets=1;porte=P;grupo=Coberta
+24;APTO 24;tickets=2;porte=M;grupo=Coberta
+31;APTO 31;tickets=1;porte=G;grupo=Descoberta
+32;APTO 32;tickets=1;porte=M;grupo=Descoberta
+33;APTO 33;tickets=1;porte=M;grupo=Descoberta
+34;APTO 34;tickets=1;porte=P;grupo=Descoberta
+41;APTO 41;tickets=1;porte=M;grupo=Descoberta
+42;APTO 42;tickets=1;porte=G;grupo=Descoberta
+43;APTO 43;tickets=1;porte=M;grupo=Descoberta
+44;APTO 44;tickets=1;porte=M;grupo=Descoberta
+[LOTES]
+L01;G1-01;porte=M;capacidade=1;grupo=Coberta
+L02;G1-02;porte=M;capacidade=1;grupo=Coberta
+L03;G1-03;porte=G;capacidade=1;grupo=Coberta
+L04;G1-04;porte=P;capacidade=1;grupo=Coberta
+L05;G1-05;porte=M;capacidade=1;grupo=Coberta
+L06;G1-06+G1-07;porte=G;capacidade=2;grupo=Coberta
+L07;G1-08;porte=M;capacidade=1;grupo=Coberta
+L08;G1-09;porte=M;capacidade=1;grupo=Coberta
+L09;G1-10;porte=P;capacidade=1;grupo=Coberta
+L10;G2-01;porte=G;capacidade=1;grupo=Descoberta
+L11;G2-02;porte=G;capacidade=1;grupo=Descoberta
+L12;G2-03+G2-04;porte=M;capacidade=2;grupo=Descoberta
+L13;G2-05;porte=M;capacidade=1;grupo=Descoberta
+L14;G2-06;porte=P;capacidade=1;grupo=Descoberta
+L15;G2-07;porte=M;capacidade=1;grupo=Descoberta
+L16;G2-08;porte=M;capacidade=1;grupo=Descoberta
+[ETIQUETAS]
+G1-01;Cobertura=Coberta;Nivel=Subsolo
+G1-02;Cobertura=Coberta;Nivel=Subsolo
+G1-03;Cobertura=Coberta;Nivel=Subsolo
+G1-04;Cobertura=Coberta;Nivel=Subsolo
+G1-05;Cobertura=Coberta;Nivel=Subsolo
+G1-06;Cobertura=Coberta;Nivel=Subsolo
+G1-07;Cobertura=Coberta;Nivel=Subsolo
+G1-08;Cobertura=Coberta;Nivel=Subsolo
+G1-09;Cobertura=Coberta;Nivel=Subsolo
+G1-10;Cobertura=Coberta;Nivel=Subsolo
+G1-11;Cobertura=Coberta;Nivel=Subsolo
+G1-12;Cobertura=Coberta;Nivel=Subsolo
+G2-01;Cobertura=Descoberta;Nivel=Patio
+G2-02;Cobertura=Descoberta;Nivel=Patio
+G2-03;Cobertura=Descoberta;Nivel=Patio
+G2-04;Cobertura=Descoberta;Nivel=Patio
+G2-05;Cobertura=Descoberta;Nivel=Patio
+G2-06;Cobertura=Descoberta;Nivel=Patio
+G2-07;Cobertura=Descoberta;Nivel=Patio
+G2-08;Cobertura=Descoberta;Nivel=Patio
+G2-09;Cobertura=Descoberta;Nivel=Patio
+[PRE_ATRIBUIDAS]
+G2-09;42;Vaga contigua a rampa destinada a unidade 42 por laudo medico apresentado, deliberado em AGE de 12/09/2026
+[FORA_DO_POOL]
+G1-11;Vaga acessivel, Decreto 9.451/2018 art. 8 par. 3, sob administracao do condominio
+G1-12;Vaga acessivel adicional aprovada em AGE, ata de 12/09/2026`;
+
+function veredito(classe, titulo, texto){
+  const el=$("veredito");
+  el.className="veredito on "+classe;
+  el.innerHTML="";
+  const b=document.createElement("b"); b.textContent=titulo;
+  const s=document.createElement("span"); s.textContent=texto;
+  el.appendChild(b); el.appendChild(s);
+}
+
+async function verificar(){
+  try{
+    const r = await sortear($("payload").value, $("beacon").value.trim());
+
+    $("o-agrupamento").textContent = (r.agrupamento && r.agrupamento !== "NENHUM")
+      ? "por " + r.agrupamento + ": " + r.grupos.join(", ")
+      : "nenhuma, todas as unidades concorreram a todas as vagas";
+    $("o-fonte").textContent   = r.beaconDeclarado;
+    $("o-congelado").textContent = r.congeladoEm;
+    $("o-commit").textContent  = r.commit;
+    $("o-semente").textContent = r.semente;
+    $("o-hash").textContent    = r.resultadoHash;
+    $("o-politica").textContent= r.politica;
+
+    const tb=$("o-tabela"); tb.textContent="";
+    function linha(classe, celulas){
+      const tr=document.createElement("tr"); if(classe) tr.className=classe;
+      for(const v of celulas){ const td=document.createElement("td"); td.textContent=v; tr.appendChild(td); }
+      tb.appendChild(tr);
+    }
+    for(const a of r.preAtribuidas)
+      linha("pre", ["—", "unidade "+a.unidade, "—", "fora do sorteio", a.vaga]);
+    for(const a of r.atribuicoes)
+      linha("", [a.pedido, a.rotulo, a.grupo, a.lote, a.vagas.join(" + ")]);
+    for(const s of r.semVaga)
+      linha("sem", [s.pedido, s.rotulo, s.grupo, "SEM VAGA", "lista de espera"]);
+
+    const cEsp=$("commitEsperado").value.trim().toLowerCase();
+    const hEsp=$("hashEsperado").value.trim().toLowerCase();
+
+    if(!cEsp && !hEsp){
+      veredito("v-aviso","Recalculado, mas sem conferência",
+        "Preencha o compromisso e o hash do resultado lançados na ata para que a página possa comparar.");
+      return;
+    }
+    const erros=[];
+    if(cEsp && cEsp!==r.commit) erros.push("o compromisso não confere com o lançado na ata");
+    if(hEsp && hEsp!==r.resultadoHash) erros.push("o resultado não confere com o registrado na ata");
+
+    if(erros.length){
+      veredito("v-erro","NÃO CONFERE", erros.join("; ") + ".");
+    }else{
+      veredito("v-ok","CONFERE",
+        "O resultado recalculado é idêntico ao apurado na assembleia, a partir dos mesmos insumos públicos.");
+    }
+  }catch(e){
+    veredito("v-erro","Erro na verificação", e.message);
+  }
+}
+
+$("payload").value = EXEMPLO;
+$("btn").addEventListener("click", verificar);
+for(const id of ["payload","beacon","commitEsperado","hashEsperado"])
+  $(id).addEventListener("input", verificar);
+verificar();
+</script>
+</body>
+</html>

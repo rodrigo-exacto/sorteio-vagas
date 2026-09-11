@@ -1,0 +1,26 @@
+# ---------------------------------------------------------------------------
+# Dados de condomínio NUNCA entram no repositório.
+# O projeto de cada assembleia tem unidade, rótulo e vaga de cada morador.
+# Isso é dado pessoal: vive na pasta do condomínio e no dossiê da ata, não aqui.
+# ---------------------------------------------------------------------------
+*-garagem-justa.json
+dados/unicco-*.csv
+*.xlsx
+*.xls
+*.pdf
+
+# Pasta onde o app da Claude deposita arquivos entregues nesta conversa.
+# Pode receber planilha, PDF ou projeto de condomínio a qualquer momento.
+Claude outputs/
+
+# Artefatos de build e lixo de sistema
+garagemjusta-site.zip
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# A pasta site/ é derivada, mas FICA no repositório de propósito: é ela que a
+# hospedagem publica, e não há etapa de build no servidor. Regere com
+# python3 tools/gerar-site.py e comite junto.
