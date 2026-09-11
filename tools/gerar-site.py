@@ -242,177 +242,26 @@ def main():
     )
 
     # ---- index.html ----
-    diagrama = """
-<figure class="figura">
-<div class="rolagem">
-<svg class="linha-tempo" viewBox="0 0 880 210" role="img"
-     aria-label="Linha do tempo: a lista é congelada e o compromisso vai para a ata; só depois chega o número da fonte externa; o resultado é a conta dos dois.">
+    # ---- index.html, montada a partir de tools/inicio/ ----
+    base = pathlib.Path(__file__).resolve().parent / "inicio"
+    css = (base / "estilo.css").read_text(encoding="utf-8")
+    corpo = (base / "corpo.html").read_text(encoding="utf-8").replace("{{SHA}}", sha)
+    js = (base / "script.js").read_text(encoding="utf-8")
 
-  <text class="rot" x="180" y="40" text-anchor="middle">Lista congelada</text>
-  <rect class="chip" x="88" y="54" width="184" height="26" rx="4"/>
-  <text class="sub" x="180" y="71" text-anchor="middle">compromisso 9f3a2b7c...</text>
-
-  <g>
-    <text class="rot" x="560" y="40" text-anchor="middle">Número de fora</text>
-    <rect class="chip" x="452" y="54" width="216" height="26" rx="4"/>
-    <text class="sub" x="560" y="71" text-anchor="middle">Loteria Federal ou drand</text>
-    <circle class="marco" cx="560" cy="134" r="16"/>
-    <circle class="glifo" cx="554" cy="129" r="2.2"/>
-    <circle class="glifo" cx="566" cy="129" r="2.2"/>
-    <circle class="glifo" cx="554" cy="140" r="2.2"/>
-    <circle class="glifo" cx="566" cy="140" r="2.2"/>
-  </g>
-
-  <text class="rot" x="770" y="40" text-anchor="middle">Resultado</text>
-  <rect class="chip" x="690" y="54" width="160" height="26" rx="4"/>
-  <text class="sub" x="770" y="71" text-anchor="middle">um só possível</text>
-
-  <rect class="vao pulsa" x="180" y="126" width="380" height="16" rx="8"/>
-  <line class="trilho" x1="40" y1="134" x2="826" y2="134"/>
-  <path class="trilho" d="M826 128 L840 134 L826 140" fill="none"/>
-  <circle class="pulso" cx="180" cy="134" r="4"/>
-
-  <circle class="marco" cx="180" cy="134" r="16"/>
-  <rect class="glifo" x="173" y="133" width="14" height="10" rx="2"/>
-  <path d="M176 133 v-4 a4 4 0 0 1 8 0 v4" fill="none" stroke="var(--marca-ink)" stroke-width="2"/>
-
-  <circle class="marco" cx="770" cy="134" r="16"/>
-  <rect class="glifo" x="762" y="130" width="16" height="2.4" rx="1.2"/>
-  <rect class="glifo" x="762" y="136" width="16" height="2.4" rx="1.2"/>
-
-  <text class="sub" x="180" y="164" text-anchor="middle">assembleia abre</text>
-  <text class="sub" x="560" y="164" text-anchor="middle">minutos depois</text>
-  <text class="sub" x="770" y="164" text-anchor="middle">na hora</text>
-  <text class="sub" x="370" y="194" text-anchor="middle">neste intervalo o número ainda não existe, para ninguém</text>
-</svg>
-</div>
-<figcaption>A ordem é o que prova. O compromisso da lista é lavrado em ata antes de
-existir o número que vai embaralhá-la, então não há como escolher a lista sabendo o
-sorteio, nem o sorteio sabendo a lista.</figcaption>
-</figure>
-"""
-
-    inicio = f"""
-<div class="heroi">
-<h1>O sorteio da sua vaga pode ser conferido por você</h1>
-
-<p class="chamada">Garagem Justa é o processo que a administração usa para sortear
-vagas de garagem em assembleia. Ele foi feito para que ninguém precise confiar em
-quem organizou: com os dados que constam da ata, qualquer condômino refaz o
-cálculo no próprio computador e chega ao mesmo resultado, ou descobre que não
-chega.</p>
-
-<div class="botoes">
-  <a class="b" href="/verificador.html">Conferir um sorteio</a>
-  <a class="b sec" href="/protocolo.html">Como funciona por dentro</a>
-</div>
-</div>
-
-{diagrama}
-
-<h2>Como funciona</h2>
-
-<div class="grade grade-3">
-  <div class="passo">
-    <div class="n">1</div>
-    <h3>A lista é fechada na frente de todos</h3>
-    <p>Encerrada a discussão sobre quem participa e quais vagas são sorteáveis, a
-    relação é congelada na assembleia e dela se extrai um resumo criptográfico, o
-    compromisso. Ele é lido em voz alta e lançado em ata. Qualquer alteração
-    posterior, mesmo de um único caractere, faz esse resumo deixar de bater.</p>
-  </div>
-  <div class="passo">
-    <div class="n">2</div>
-    <h3>A aleatoriedade vem de fora e chega depois</h3>
-    <p>Só então se colhe o número que vai embaralhar a lista: os prêmios da Loteria
-    Federal daquela noite, ou uma rodada do sorteio distribuído drand, publicada
-    minutos depois do congelamento. Nos dois casos ninguém, nem a administração,
-    pode conhecer esse número no momento em que a lista foi fechada.</p>
-  </div>
-  <div class="passo">
-    <div class="n">3</div>
-    <h3>O resultado é uma conta, não uma decisão</h3>
-    <p>Compromisso mais aleatoriedade produzem um único resultado possível. Quem
-    repetir a conta com os mesmos dados chega necessariamente ao mesmo lugar, hoje
-    ou daqui a dez anos.</p>
-  </div>
-</div>
-
-<h2>O que você precisa para conferir</h2>
-
-<p>Tudo o que segue consta da ata da assembleia, e o síndico deve fornecer a
-qualquer condômino que pedir, no dever de informação que acompanha a
-administração de coisa alheia:</p>
-
-<div class="grade grade-2">
-  <div class="precisa">
-    <span class="tag">insumo</span>
-    <h3>O texto integral da lista congelada</h3>
-    <p>É o que entra no cálculo, exatamente como foi fechado.</p>
-  </div>
-  <div class="precisa">
-    <span class="tag">prova de anterioridade</span>
-    <h3>O compromisso lançado em ata</h3>
-    <p>Prova que a lista não mudou depois que o sorteio aconteceu.</p>
-  </div>
-  <div class="precisa">
-    <span class="tag">fonte externa</span>
-    <h3>O resultado da fonte de aleatoriedade</h3>
-    <p>Você confere na origem: no portal da Caixa ou em api.drand.sh, não conosco.</p>
-  </div>
-  <div class="precisa">
-    <span class="tag">fecho</span>
-    <h3>O hash do resultado</h3>
-    <p>Prova que o resultado anunciado é o mesmo que a conta produz.</p>
-  </div>
-</div>
-
-<p>Com isso em mãos, abra o <a href="/verificador.html">verificador</a>, cole e
-compare. A página funciona offline: salve o arquivo e ele continua valendo daqui
-a anos, mesmo que este site saia do ar.</p>
-
-<div class="cartao">
-  <h3 style="margin-top:0">Confira também o próprio verificador</h3>
-  <p style="margin-bottom:8px">A ata registra o resumo criptográfico do arquivo
-  do verificador. Confira que o arquivo que você baixou é o mesmo, antes de
-  confiar no que ele diz. No Windows:
-  <code>certutil -hashfile verificador.html SHA256</code>. No Linux ou no Mac:
-  <code>sha256sum verificador.html</code>.</p>
-  <p class="hash" style="margin:0 0 10px">SHA-256 da versão publicada agora:<br>{sha}</p>
-  <p style="margin:0;font-size:14px">Se a sua ata cita outro hash, ela é de uma
-  versão anterior do verificador, que continua publicada em
-  <code>/v/&lt;hash da ata&gt;/verificador.html</code>.</p>
-</div>
-
-<h2>Não quer confiar em JavaScript</h2>
-
-<p>O mesmo cálculo está implementado em Python, de forma independente, e as duas
-implementações são conferidas uma contra a outra por vetores de teste. Baixe
-<a href="/core/sorteio.py">sorteio.py</a> e rode
-<code>python3 sorteio.py payload.txt "&lt;valor da fonte&gt;"</code>. Duas
-implementações independentes que concordam valem muito mais que uma.</p>
-
-<div class="aviso">
-  <h3>O que este site sabe sobre você</h3>
-  <p>Nada. O verificador e o motor rodam inteiramente no seu navegador: os dados
-  que você cola para conferir não são enviados a servidor nenhum, nem ao nosso. O
-  cadastro de unidades e vagas de cada condomínio, esse sim, fica em sistema da
-  administradora, com acesso restrito à equipe que conduz a assembleia.</p>
-</div>
-
-<h2>Para quem conduz a assembleia</h2>
-
-<p>A aplicação de condução é de uso da administração: <a href="/app/">abrir a
-aplicação</a>.</p>
-"""
-
+    cabeca = (
+        '<!doctype html>\n<html lang="pt-BR">\n<head>\n'
+        '<meta charset="utf-8">\n'
+        '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
+        "<title>Garagem Justa — sorteio de vagas de garagem verificável</title>\n"
+        '<meta name="description" content="A lista é lacrada antes do sorteio, a '
+        'aleatoriedade vem de fora e o resultado pode ser reproduzido por qualquer '
+        'condômino.">\n'
+        '<meta name="color-scheme" content="light dark">\n'
+        "<style>" + css + "</style>\n</head>\n<body>\n"
+        '<div class="faixa-marca"></div>\n'
+    )
     (SITE / "index.html").write_text(
-        pagina(
-            "Garagem Justa — sorteio de vagas verificável",
-            "Confira por conta própria o sorteio de vagas de garagem do seu condomínio.",
-            inicio,
-            "inicio",
-        ),
+        cabeca + corpo + "\n<script>" + js + "</script>\n</body>\n</html>\n",
         encoding="utf-8",
     )
 
