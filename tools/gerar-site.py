@@ -222,7 +222,7 @@ def main():
 
     # a aplicação não precisa aparecer em buscador
     (SITE / "robots.txt").write_text(
-        "User-agent: *\nDisallow: /core/\n", encoding="utf-8"
+        "User-agent: *\nDisallow: /core/\nDisallow: /v/\n", encoding="utf-8"
     )
 
     # ---- protocolo.html, gerado do markdown normativo ----
