@@ -47,6 +47,13 @@ textarea,input[type=text]{width:100%;font:13px/1.5 var(--mono);color:var(--ink);
   border:1px solid var(--rule);border-radius:4px;padding:8px 10px;resize:vertical}
 textarea:focus,input:focus{outline:2px solid var(--marca);outline-offset:1px}
 .field{margin-bottom:14px}
+.arquivo{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 8px}
+.arquivo button{font:600 13px var(--sans);background:var(--panel);color:var(--ink);
+  border:1px solid var(--rule);border-radius:4px;padding:7px 12px}
+.arquivo button:hover{border-color:var(--marca);background:var(--panel)}
+.arquivo .nome{font-size:12.5px;color:var(--muted)}
+.arquivo .nome.posto{color:var(--ok)}
+textarea.recebendo{outline:2px dashed var(--marca);outline-offset:2px;background:var(--panel)}
 button{font:600 14px var(--sans);background:var(--ink);color:var(--ground);border:0;border-radius:4px;
   padding:10px 18px;cursor:pointer}
 button:hover{background:var(--ink2)}
@@ -76,7 +83,7 @@ footer code{font-family:var(--mono);font-size:12px}
 
 <header><div class="wrap">
   <h1>Verificador independente <small>Garagem Justa · protocolo garagem-justa/v1</small></h1>
-  <p>Cole o payload congelado na assembleia e o valor da fonte de aleatoriedade.
+  <p>Escolha o arquivo do cadastro congelado na assembleia, ou arraste, ou cole o texto, e informe o valor da fonte de aleatoriedade.
   Esta página recalcula o sorteio do zero e diz se bate com o que foi apurado.
   Roda inteiramente no seu navegador, sem enviar nada para lugar nenhum, e
   funciona offline: salve o arquivo e ele continua valendo.</p>
@@ -94,6 +101,11 @@ footer code{font-family:var(--mono);font-size:12px}
         <label for="payload">Payload do compromisso</label>
         <p class="hint">O texto integral do conjunto congelado na abertura do sorteio,
         cujo resumo criptográfico foi lido em voz alta e lançado em ata.</p>
+        <div class="arquivo">
+          <input type="file" id="escolher" accept=".txt,text/plain" hidden>
+          <button type="button" id="btnArquivo">Escolher o arquivo do cadastro</button>
+          <span class="nome" id="nomeArquivo">ou arraste o arquivo para o campo abaixo, ou cole o texto</span>
+        </div>
         <textarea id="payload" rows="14" spellcheck="false"></textarea>
       </div>
 
@@ -531,6 +543,55 @@ async function verificar(){
     veredito("v-erro","Erro na verificação", e.message);
   }
 }
+
+/* ----------------------------------------------------------------------------
+ * Arquivo em vez de copiar e colar.
+ *
+ * O payload tem centenas de linhas. Pedir que o condômino abra o .txt, selecione
+ * tudo e cole é atrito suficiente para ele desistir de conferir, e conferência
+ * que ninguém faz não prova nada. O arquivo é lido aqui mesmo, pelo navegador:
+ * nada sobe para lugar nenhum, e a página continua funcionando offline.
+ * ------------------------------------------------------------------------- */
+
+function receberArquivo(f){
+  if(!f) return;
+  const fr = new FileReader();
+  fr.onload = () => {
+    $("payload").value = String(fr.result);
+    const n = $("nomeArquivo");
+    n.textContent = f.name + " carregado";
+    n.className = "nome posto";
+    verificar();
+  };
+  fr.onerror = () => {
+    const n = $("nomeArquivo");
+    n.textContent = "não consegui ler esse arquivo";
+    n.className = "nome";
+  };
+  fr.readAsText(f, "utf-8");
+}
+
+$("btnArquivo").addEventListener("click", () => $("escolher").click());
+$("escolher").addEventListener("change", (e) => {
+  receberArquivo(e.target.files && e.target.files[0]);
+  e.target.value = "";
+});
+
+const zona = $("payload");
+for(const evento of ["dragenter","dragover"]){
+  zona.addEventListener(evento, (e) => {
+    e.preventDefault();
+    zona.classList.add("recebendo");
+  });
+}
+for(const evento of ["dragleave","dragend","drop"]){
+  zona.addEventListener(evento, () => zona.classList.remove("recebendo"));
+}
+zona.addEventListener("drop", (e) => {
+  e.preventDefault();
+  const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+  if(f) receberArquivo(f);
+});
 
 $("payload").value = EXEMPLO;
 $("btn").addEventListener("click", verificar);
