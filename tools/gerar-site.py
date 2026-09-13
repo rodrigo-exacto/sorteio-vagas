@@ -177,13 +177,15 @@ def main():
             if rel and rel != "index.html":   # o indice e regerado, nao preservado
                 acervo[rel] = p.read_bytes()
         shutil.rmtree(SITE)
-    (SITE / "app").mkdir(parents=True)
     (SITE / "core").mkdir(parents=True)
 
     # arquivos que vão como estão
     shutil.copy(RAIZ / "app" / "verificador.html", SITE / "verificador.html")
-    for nome in ("index.html", "app.css", "app.js"):
-        shutil.copy(RAIZ / "app" / nome, SITE / "app" / nome)
+    # A aplicação de condução NÃO vai para o site público: ela é o sistema
+    # online, em app.garagemjusta.com.br, atrás de login. A versão estática
+    # continua em app/ no repositório, para uso local por duplo clique no
+    # ABRIR-GARAGEM-JUSTA.html, mas publicá-la deixaria qualquer pessoa conduzir
+    # um sorteio e apresentar o resultado como se fosse da administradora.
     for nome in ("sorteio.browser.js", "sorteio.py", "vetores.json",
                  "exemplo-unicco.txt", "exemplo-unicco-drand.txt", "teste.py"):
         shutil.copy(RAIZ / "core" / nome, SITE / "core" / nome)
@@ -220,7 +222,7 @@ def main():
 
     # a aplicação não precisa aparecer em buscador
     (SITE / "robots.txt").write_text(
-        "User-agent: *\nDisallow: /app/\nDisallow: /core/\n", encoding="utf-8"
+        "User-agent: *\nDisallow: /core/\n", encoding="utf-8"
     )
 
     # ---- protocolo.html, gerado do markdown normativo ----
