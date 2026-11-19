@@ -4,7 +4,9 @@
 # Isso é dado pessoal: vive na pasta do condomínio e no dossiê da ata, não aqui.
 # ---------------------------------------------------------------------------
 *-garagem-justa.json
-dados/unicco-*.csv
+dados/*
+!dados/modelo-*.csv
+!dados/exemplo-*.txt
 *.xlsx
 *.xls
 *.pdf
